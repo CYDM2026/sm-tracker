@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SM Weekly Tracker v5 — mediapro.kh</title>
+<style>
+:root{--bg:#f5f6f8;--surface:#fff;--border:#e2e5ea;--text:#1a1d23;--text2:#5a6070;--text3:#9aa0ad;--accent:#3b5bdb;--accent-bg:#eef2ff;--accent-text:#2f4abf;--success:#2f9e44;--success-bg:#ebfbee;--success-border:#b2f2bb;--danger:#c92a2a;--danger-bg:#fff5f5;--danger-border:#ffc9c9;--warning:#e67700;--warning-bg:#fff9db;--radius:8px;--yt:#cc0000;--yt-bg:#ffeaea;--fb:#1877f2;--fb-bg:#e7f0fd;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter','Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:14px}
+.layout{display:flex;min-height:100vh}
+.sidebar{width:220px;background:var(--surface);border-right:1px solid var(--border);position:fixed;top:0;left:0;height:100vh;display:flex;flex-direction:column;z-index:100}
+.logo{padding:18px 16px;border-bottom:1px solid var(--border)}
+.logo h1{font-size:14px;font-weight:700}
+.logo p{font-size:11px;color:var(--text3);margin-top:2px}
+.nav{flex:1;padding:10px 8px}
+.nb{display:flex;align-items:center;gap:9px;padding:8px 12px;border-radius:var(--radius);cursor:pointer;color:var(--text2);font-size:13px;font-weight:500;margin-bottom:2px;border:none;background:transparent;width:100%;text-align:left}
+.nb:hover{background:var(--bg);color:var(--text)}
+.nb.active{background:var(--accent-bg);color:var(--accent-text)}
+.sbot{padding:12px;border-top:1px solid var(--border);font-size:11px;color:var(--text3);text-align:center}
+.main{margin-left:220px;padding:28px 32px;flex:1}
+.phd{margin-bottom:22px}
+.phd h2{font-size:19px;font-weight:700}
+.phd p{font-size:13px;color:var(--text2);margin-top:4px}
+.view{display:none}
+.view.active{display:block}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px}
+.card-title{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:14px}
+.mg{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-bottom:20px}
+.mt{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px}
+.mt .ml{font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px}
+.mt .mv{font-size:24px;font-weight:700;letter-spacing:-0.5px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius);font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--text)}
+.btn:hover{background:var(--bg)}
+.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn.primary:hover{background:#2f4abf}
+.btn.sm{padding:5px 10px;font-size:12px}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.tw{overflow-x:auto;border-radius:12px;border:1px solid var(--border);margin-bottom:16px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead th{background:var(--bg);padding:9px 12px;text-align:left;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.04em;border-bottom:1px solid var(--border);white-space:nowrap}
+tbody td{padding:10px 12px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:var(--bg)}
+td.num{font-weight:600;font-variant-numeric:tabular-nums}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700}
+.byt{background:var(--yt-bg);color:var(--yt)}
+.bfb{background:var(--fb-bg);color:var(--fb)}
+.big{background:#fce8f5;color:#c13584}
+.btt{background:#f0f0f0;color:#333}
+.alert{padding:10px 14px;border-radius:var(--radius);font-size:13px;margin-bottom:14px}
+.alert.success{background:var(--success-bg);color:var(--success);border:1px solid var(--success-border)}
+.alert.error{background:var(--danger-bg);color:var(--danger);border:1px solid var(--danger-border)}
+.alert.info{background:var(--accent-bg);color:var(--accent-text);border:1px solid #bac8ff}
+.loading{display:flex;align-items:center;gap:10px;padding:16px;color:var(--text2);font-size:13px}
+.spin{width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.pbar{width:100%;height:6px;background:var(--border);border-radius:3px;margin:8px 0}
+.pfill{height:100%;background:var(--accent);border-radius:3px;transition:width 0.3s}
+.pftab{padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:var(--surface);font-size:12px;font-weight:600;color:var(--text2);cursor:pointer}
+.pftab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.date-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 16px}
+.date-row label{font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.04em;white-space:nowrap}
+.date-row input[type=date]{padding:6px 10px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;color:var(--text);background:var(--bg)}
+.date-row select{padding:6px 10px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;color:var(--text);background:var(--bg)}
+.wbadge{display:inline-block;padding:4px 12px;border-radius:20px;background:var(--accent-bg);color:var(--accent-text);font-size:12px;font-weight:600}
+.cal-wrap{position:relative;display:inline-block}
+.cal-btn{display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;min-width:250px;user-select:none;font-size:13px;color:var(--text);font-weight:500}
+.cal-popup{display:none;position:absolute;top:calc(100% + 6px);left:0;z-index:999;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;box-shadow:0 8px 32px rgba(0,0,0,0.15);min-width:310px}
+.cal-popup.open{display:block}
+.cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.cal-nav button{border:none;background:var(--bg);cursor:pointer;font-size:18px;color:var(--text2);padding:3px 10px;border-radius:6px}
+.cal-nav span{font-size:13px;font-weight:600;color:var(--text)}
+.cal-days{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:4px}
+.cal-day-hdr{text-align:center;font-size:10px;font-weight:700;color:var(--text3);padding:3px}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.cal-cell{text-align:center;padding:6px 2px;font-size:12px;border-radius:6px;cursor:default;color:var(--text3)}
+.cal-cell.has-data{cursor:pointer;color:var(--accent-text);font-weight:600;background:var(--accent-bg)}
+.cal-cell.has-data:hover{background:#dde4ff}
+.cal-cell.range-edge{background:var(--accent);color:#fff;font-weight:700}
+.cal-cell.in-range{background:var(--accent-bg);color:var(--accent-text)}
+.cal-cell.today{border:1.5px solid var(--accent)}
+.cal-actions{display:flex;justify-content:space-between;margin-top:10px;padding-top:8px;border-top:1px solid var(--border)}
+.cal-actions button{border:none;background:none;cursor:pointer;font-size:12px;font-weight:600}
+.weeks-list{margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+.weeks-list-title{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px}
+.week-item{display:flex;align-items:center;justify-content:space-between;padding:7px 10px;border-radius:6px;cursor:pointer;margin-bottom:3px;font-size:12px}
+.week-item:hover{background:var(--bg)}
+.week-item.active{background:var(--accent);color:#fff}
+.cmp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:10px;margin-bottom:16px}
+.cmp-tile{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px}
+.cmp-tile .cl{font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;margin-bottom:5px}
+.cmp-tile .cv{font-size:20px;font-weight:700}
+.cmp-tile .cp{font-size:11px;color:var(--text3);margin-top:2px}
+.cmp-tile .cd{font-size:13px;font-weight:700;margin-top:3px}
+.up{color:#1877f2}.down{color:#c92a2a}.flat{color:var(--text3)}
+.posts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:16px}
+.post-tile{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px}
+.mc-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 0.4fr;gap:5px;align-items:center;margin-bottom:5px}
+.mc-grid input{padding:5px 7px;border:1px solid var(--border);border-radius:6px;font-size:12px;color:var(--text);background:var(--surface);width:100%}
+.mc-hdr{font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;padding:0 2px}
+</style>
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar">
+  <div class="logo"><h1>📊 SM Weekly Tracker</h1><p>mediapro.kh — v5.0</p></div>
+  <nav class="nav">
+    <button class="nb active" onclick="showView('dashboard')"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span>Dashboard</span></button>
+    <button class="nb" onclick="showView('collect')"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg><span>Collect Weekly</span></button>
+    <button class="nb" onclick="showView('metricool')"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 12l2 2 4-4"/></svg><span>Metricool Entry</span></button>
+    <button class="nb" onclick="showView('history')"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><span>Weekly History</span></button>
+    <button class="nb" onclick="showView('compare')"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg><span>Compare Periods</span></button>
+    <button class="nb" onclick="showView('export')"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg><span>Export</span></button>
+  </nav>
+  <div class="sbot">v5.0 — Weekly Period Tracking</div>
+</aside>
+<main class="main">
+
+<!-- DASHBOARD -->
+<div class="view active" id="view-dashboard">
+  <div class="phd"><h2>Dashboard</h2><p>Latest collected weekly data across all platforms.</p></div>
+  <div style="display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:16px">
+    <div>
+      <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px">Week</div>
+      <div class="cal-wrap">
+        <div class="cal-btn" id="dash-cal-btn" onclick="dashCalToggle()">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          <span id="dash-week-lbl">Select week</span>
+          <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="margin-left:auto"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+        <div class="cal-popup" id="dash-cal-popup">
+          <div class="cal-nav"><button onclick="dashCalMove(-1)">&#8249;</button><span id="dash-cal-month"></span><button onclick="dashCalMove(1)">&#8250;</button></div>
+          <div class="cal-days"><div class="cal-day-hdr">Su</div><div class="cal-day-hdr">Mo</div><div class="cal-day-hdr">Tu</div><div class="cal-day-hdr">We</div><div class="cal-day-hdr">Th</div><div class="cal-day-hdr">Fr</div><div class="cal-day-hdr">Sa</div></div>
+          <div class="cal-grid" id="dash-cal-grid"></div>
+          <div class="cal-actions"><button onclick="dashCalToday()" style="color:var(--accent-text)">Today</button><button onclick="dashCalClose()" style="color:var(--text3)">Close</button></div>
+          <div class="weeks-list"><div class="weeks-list-title">Saved weeks</div><div id="dash-weeks-list"></div></div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px">Platform</div>
+      <div style="display:flex;gap:6px">
+        <button class="pftab active" onclick="setPF('all')" id="pf-all">All</button>
+        <button class="pftab" onclick="setPF('youtube')" id="pf-yt">▶️ YouTube</button>
+        <button class="pftab" onclick="setPF('facebook')" id="pf-fb">📘 Facebook</button>
+        <button class="pftab" onclick="setPF('instagram')" id="pf-ig">📸 Instagram</button>
+        <button class="pftab" onclick="setPF('tiktok')" id="pf-tt">🎵 TikTok</button>
+      </div>
+    </div>
+  </div>
+  <div class="mg" id="dash-totals"></div>
+  <div id="dash-posts-section" style="display:none;margin-bottom:16px">
+    <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px">Total posts per channel</div>
+    <div class="posts-grid" id="dash-posts-grid"></div>
+  </div>
+  <div class="tw"><table>
+    <thead><tr><th>Platform</th><th>Account</th><th>Page / Channel</th><th>Followers</th><th>Views</th><th>Reach</th><th>Engagement</th><th>Likes</th><th>Comments</th><th>Shares</th><th>Posts</th><th>Last Post</th><th>Collected</th></tr></thead>
+    <tbody id="dash-tbody"></tbody>
+  </table></div>
+</div>
+
+<!-- COLLECT -->
+<div class="view" id="view-collect">
+  <div class="phd"><h2>Collect weekly data</h2><p>Auto-collect from YouTube API and Facebook API for the selected week.</p></div>
+  <div class="date-row">
+    <label>Week Start</label><input type="date" id="col-start">
+    <label>Week End</label><input type="date" id="col-end">
+    <span id="col-badge" class="wbadge" style="display:none"></span>
+  </div>
+  <div id="col-alert"></div>
+  <div class="card">
+    <div class="card-title">Auto-collect all platforms</div>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:16px">Fetches weekly stats from all 17 YouTube channels and all Facebook pages.</p>
+    <div class="btn-row">
+      <button class="btn primary" onclick="collectAll()">🔄 Collect ALL now</button>
+      <button class="btn" onclick="collectYT()">▶️ YouTube only</button>
+      <button class="btn" onclick="collectFB()">📘 Facebook only</button>
+    </div>
+  </div>
+  <div id="col-progress"></div>
+  <div id="col-log" style="font-size:12px;color:var(--text2);line-height:1.9;padding:0 4px;max-height:300px;overflow-y:auto"></div>
+</div>
+
+<!-- METRICOOL MANUAL ENTRY -->
+<div class="view" id="view-metricool">
+  <div class="phd"><h2>Metricool — Manual Entry</h2><p>Enter numbers from Metricool for Facebook, Instagram and TikTok pages.</p></div>
+  <div class="date-row">
+    <label>Week Start</label><input type="date" id="mc-start" onchange="updateMcBadge()">
+    <label>Week End</label><input type="date" id="mc-end" onchange="updateMcBadge()">
+    <span id="mc-badge" class="wbadge" style="display:none"></span>
+  </div>
+  <div style="display:flex;gap:6px;margin-bottom:16px">
+    <button class="pftab active" id="mc-tab-fb" onclick="setMcPlatform('facebook')">📘 Facebook</button>
+    <button class="pftab" id="mc-tab-ig" onclick="setMcPlatform('instagram')">📸 Instagram</button>
+    <button class="pftab" id="mc-tab-tt" onclick="setMcPlatform('tiktok')">🎵 TikTok</button>
+  </div>
+  <div id="mc-alert"></div>
+  <div class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <div class="card-title" id="mc-plat-title">FACEBOOK PAGES</div>
+      <button class="btn sm primary" onclick="addMcRow()">+ Add row</button>
+    </div>
+    <div class="mc-grid" style="margin-bottom:8px">
+      <div class="mc-hdr">Page name</div>
+      <div class="mc-hdr">Followers</div>
+      <div class="mc-hdr">Reach</div>
+      <div class="mc-hdr">Impressions</div>
+      <div class="mc-hdr">Engagement</div>
+      <div class="mc-hdr">Likes</div>
+      <div class="mc-hdr">Comments</div>
+      <div class="mc-hdr">Posts</div>
+      <div></div>
+    </div>
+    <div id="mc-rows"></div>
+    <div class="btn-row" style="margin-top:14px;justify-content:flex-end">
+      <button class="btn" onclick="clearMcRows()">Clear</button>
+      <button class="btn primary" onclick="saveMcData()">💾 Save to tracker</button>
+    </div>
+  </div>
+  <div class="card" style="background:var(--accent-bg);border-color:#bac8ff">
+    <div class="card-title" style="color:var(--accent-text)">HOW TO USE</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;font-size:12px;color:var(--accent-text);line-height:1.6">
+      <div><strong>1. Open Metricool</strong><br>Analytics → select platform → set week date range</div>
+      <div><strong>2. Enter numbers</strong><br>Type the stats you see in Metricool for each page</div>
+      <div><strong>3. Save</strong><br>Click Save — data shows in Dashboard and Compare!</div>
+    </div>
+  </div>
+</div>
+
+<!-- HISTORY -->
+<div class="view" id="view-history">
+  <div class="phd"><h2>Weekly history</h2><p>All saved weekly snapshots.</p></div>
+  <div style="display:grid;grid-template-columns:260px 1fr;gap:16px">
+    <div class="card" style="padding:0">
+      <div style="padding:12px 16px;border-bottom:1px solid var(--border);font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase">Saved weeks</div>
+      <div id="hist-list"></div>
+    </div>
+    <div class="card" style="padding:0">
+      <div style="padding:12px 16px;border-bottom:1px solid var(--border);font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase" id="hist-title">Select a week</div>
+      <div class="tw" style="border:none;margin:0;border-radius:0"><table>
+        <thead><tr><th>Platform</th><th>Page</th><th>Followers</th><th>Views</th><th>Reach</th><th>Engagement</th><th>Likes</th><th>Comments</th><th>Posts</th><th>Last Post</th></tr></thead>
+        <tbody id="hist-tbody"></tbody>
+      </table></div>
+    </div>
+  </div>
+</div>
+
+<!-- COMPARE -->
+<div class="view" id="view-compare">
+  <div class="phd"><h2>Compare periods</h2><p>Select two weeks to compare performance.</p></div>
+  <div class="date-row">
+    <label>Week A</label><select id="cmp-a" onchange="renderCompare()"></select>
+    <label>Week B</label><select id="cmp-b" onchange="renderCompare()"></select>
+    <label>Platform</label>
+    <select id="cmp-plat" onchange="renderCompare()">
+      <option value="all">All</option><option value="youtube">YouTube</option><option value="facebook">Facebook</option><option value="instagram">Instagram</option><option value="tiktok">TikTok</option>
+    </select>
+  </div>
+  <div id="cmp-results"></div>
+</div>
+
+<!-- EXPORT -->
+<div class="view" id="view-export">
+  <div class="phd"><h2>Export data</h2><p>Download weekly data as CSV.</p></div>
+  <div class="date-row">
+    <label>Week</label><select id="exp-week"><option value="all">All weeks</option></select>
+    <label>Platform</label>
+    <select id="exp-plat">
+      <option value="all">All</option><option value="youtube">YouTube</option><option value="facebook">Facebook</option><option value="instagram">Instagram</option><option value="tiktok">TikTok</option>
+    </select>
+  </div>
+  <div class="btn-row" style="margin-bottom:16px">
+    <button class="btn primary" onclick="doExportCSV()">Download CSV</button>
+    <button class="btn" onclick="doCopyText()">Copy summary</button>
+    <button class="btn" style="color:var(--danger)" onclick="clearAll()">Clear all data</button>
+  </div>
+  <div class="tw"><table>
+    <thead><tr><th>Week</th><th>Platform</th><th>Account</th><th>Page</th><th>Followers</th><th>Views</th><th>Reach</th><th>Engagement</th><th>Likes</th><th>Comments</th><th>Posts</th><th>Last Post</th></tr></thead>
+    <tbody id="exp-tbody"></tbody>
+  </table></div>
+</div>
+
+</main>
+</div>
+<script>
+const YT_KEY = 'AIzaSyA-B5YNLgVpN8ZZWyvCKdvJ4hq3XQJ6t0w';
+const YT_CH = [
+  {name:'Music For You',id:'UCJ7HsRfUWODbdwMXw3l9BLA'},
+  {name:'Sreyleab',id:'UC2cL_HcKLdmcA0cb4eaTdGw'},
+  {name:'Music Sad',id:'UCi7jLGDTJXebD8OLCsUc-qQ'},
+  {name:'Pen Nita',id:'UCo3aov7WVS51yE2m9Yc0CcQ'},
+  {name:'GoodtoEat',id:'UCgsa_O30wfPctWkTgMz23CQ'},
+  {name:'Music Song',id:'UCThyrPVeFJgJqNtqqLqCb0Q'},
+  {name:'AI For Everyone',id:'UCN2zYqI6doGKJAFUj-ZBH4g'},
+  {name:'Irich VN',id:'UCDvSV0LInRrH_hNZk2OEBtQ'},
+  {name:'Ba Ba',id:'UCdrxV7zxnsUSEPnxyqbrlmA'},
+  {name:'Sok Mony',id:'UCyga1-LlZGegYa9cRqWrR8Q'},
+  {name:"ស្ដាប់ចម្រៀង",id:'UCT9hoNE5RI1fA7KkP-eduiA'},
+  {name:'Oun Yaa',id:'UCNVTLytHs1Wqzaqy7032riw'},
+  {name:'New_Song',id:'UCthzX_GZvml2ymGjRiN0aAw'},
+  {name:'Naa Det AI',id:'UC5eml8s7xZJ20A_IxhSbRPQ'},
+  {name:'Time_Cooking',id:'UCT__oTlB_vHCPfzvm6nN6Sg'},
+  {name:'An cung minh',id:'UCToFAMrl4znb_EHn8umeClg'},
+  {name:'Me and Him',id:'UCw9mMhjEAR4lnvFu_HGJ71w'}
+];
+const FB_ACC = [
+  {name:'Van Rith',token:'EAATjb8DtiU0BSAixiOMLanWa7pFaI2Os4zrb4cZBK9ZCtFnPzHtVGBmZBJzZC6HtnZA247m9CfgJ71BzAiwEnDj5RkpFkhhZCtYVCz1LZAt2b5ZBg31zfH8mw58CRzYDtchoMetfUXTAD6L1f2jjmjrAZCZBy5hfqSO7FY8CsZAqA6M2JZBGQbDphETIA1snTKfaqQGp'},
+  {name:'meymey mol',token:'EAAVUhkp2qQoBSMt2vpebaKYEWQWu8GGGCk8cqE2Mf6tqooZCbO0ZC7mcj3hDkNLYbtKOvcZA0ZAJyl4twY3BDaZB3FljEsIKZAk8UJauDMCxqPLj9VJNA5xpcy0HHsu2Lqc8XyBOLj3zUDNAXv8Fp9vWhAiFvxJ1WUXMRbpKv4Gw5DVZAWrxFZAVG3hMXDYcY5fS'},
+  {name:'Bormey chan',token:'EAAWsvM8guCEBSCBruwBSjMO0gVMR2N80cNpFSFTZBZCJjZC86zTU8h3l3ZA4ifaSuIPBQTZB2jK4c4HakWIpLJPFtvHzDJVXWkbu2ar3KSwZA1npcvFKSPF4WhM4d5Gq2ZAopzIFsuftKAyIAOclX2HfhDJAnTLUNJwSmV7mWeBOlWpIq6BzYWNWqOhkBXYNiQg'},
+  {name:'Ty Srey Ni',token:'EAAYzivQQBIcBSPqMy8mZBaZBMbuiZCPFd01uCmXbCFERpZAgAhhvxfmaitgeAppuu6rZBwDdtxwySQVHMqHZA2ZBTUq8IG5OLohBgLL6ftp3ZAWYtvHIcsbVyugbogT07ZB2zFWQwLpZAAOFISze5hr6ZC4ubI75MEu1BhUMnUKjziSpm3hpnM8tmKVjGbHnzPkLIP0'},
+  {name:'dinnimo',token:'EAAZCU533a2vIBSOMdv2da4QFhVeYZC1lCG8rMTCKZC0XD4G6cAUFPXUQyZBfGcyZCUs1TZBKi3HLF0k0cJVR5dJSmxjQZAz0YxNUyGMBVdHBQmYrVZBVCMobXK603wyKVmK2VCRk9ygE1vaDU8Tk3hyTtfIxlesohX7Xp6ZAX6JdEnLp2k4jLhcuzcZC1IuSC5pM9C'},
+  {name:'Moev Moev',token:'EAAYZClXxQbOcBSJ51t3XtpjTUUN3pS4mTQbKy4vgl8cccv0bZCyE1zjDytP9GkvZCurt2ccrNdTFBlVA85jtlJOz8fdsvIF2y6A5Cbfuo55xaVORRZCBwJ8JpZAsrhBWTPLdffqNFpXhQcZBRbjsZBoIXl1iyEPYr4wyqV7oYEoHuoTR7ZCgwSSGYJsuXEYjBwH5'},
+  {name:'Ha Nguyen',token:'EAAXIWBhi25UBSOfb9I9I33ZChlfwRSTVZBYEF6qAXmDyqWxGA0mMSTZBE9ruBeDjekpFeF2zzeW5k86eNEnZACoQC18gZChpITCQo07ld7vJ2fndqsM2cZCMY5GGoR9OuU3EwRqeZAYNw1ee6vIQhYOy9qmpE44AN2muCb0z1dcXSo0TJUEY9MrQNxlzROTO1Qh'},
+  {name:'nana',token:'EAAWnhBvpxW0BSKRoS36WkCv6q9sh5ZBE4obmiVuiLxSw8XZANeIPQA4dVzXoxMT58ffk3OSfGpoRMIS4RrCZA7Ul3NzbpLwHqZA2aeQxt6sAgC5pm5SHXRyPUEwNPZCnJ4Xl3JJiAOoBdp39npZBTefsZAIB6rENIrVAzm9BMZAwKdaC4NAXSM81oO6nj3jN6B86xV0DWm8Vb6EwYsD1'},
+  {name:'Jee Ka',token:'EAAXCi4lI0xQBSAsvjLgejN94y6k6pbMo6vvZAaZAvPQxgFZCgGvpH4niS0kZBGW9aYLle43NFgEwtzsGroOeAaL1eEGJ70ZB6b4QZAEv3V5cMZAOhhyjweIwHz3pk7VNXgIqlZCBXddaxLPb2xW4ln78U8gELU2PDZAxhqfvpvma107i9KCsocoPpZAD81PZC436ZBtx'},
+  {name:'Trisha Trisha',token:'EAAMnDBkWXtsBSI9vB3LFo3zB79NO2386TrUyZCpyjHbR0gzLqgkN6umsUU3XqEhMmPmCpbtM6YdnJiZAoDy42MbwkcuKzZBrmCb3ZB1G1wTS4IpRBZBnl1dCu2pbQU2TsK9OzFriWRZBWptbePXOh12ZCITZAepzWP5tK7qHXlZA2YKcAJFqAaswkrwRbxGc5oJdr'},
+  {name:'Sokhour Sok',token:'EAAMhIYONRB4BSMVkLuh455NzKdw2L9kNwNZBZAgKvenpTKaBbjnJBUqi7woO4eUu7D4SZCPMXC0N6Htw0We2iwEZCECkyNGr4JKTI5sDyq5unJgVMTV7N6kykg8WvIt3naaHE1ETQtibDCqxMpj791BgKohtxVEY0HeeZCFXeNXwlHfXwEAsQQ8LCuvhTrro3'},
+  {name:'Chan Dara',token:'EAAcC6ZBacE0kBSLecL4U7nVqn7BoTpNhavTeHIjQZC4rDBksY9ULMj58anSDKQ41SsgZAf2SjcruuTJrelv01hpXM5ZCg7NEJQnFNLqE5l2EjeHxHQWwpZB80w7vjNfEDDZC2ucBFQVL8IvZBYfDewRhGYSkX1jT6wvIZCrenEY0rKDsNlZBprpFmLaLmDwLEJ9ob'},
+  {name:'Oun Na Bii',token:'EAAPGG36LZAhMBSJq61gegCfs2kUVbFR8disVLwa9MgRLOGfKvElOV6PwWhrQT7EZBPIHwjWI7s8cX5sZCu4h6uTzKLHY1eHaN9OILrNs52ShIZB3QhVvn0Fe6PIcs4G6rlIaVMRXk2lZCELZADylZCg2Xd10BOjpOpIznV1ZBjNdF0BTwHQjxBH9i35RV5EOUl1bJ1N4f8ZB1Antkk7a7'},
+  {name:'Ry Na',token:'EAAYWJKrEaAUBSAa88W6ZBEteyCupo72AUinuWwfrkeBdlq5qAcZAA9SZCZCEBdhC7tPPVopDBKJg7wLlZC6gMjZAadKx7F0dk7pyRy7Tsbm0vPlDw7z9EE69szN6BZABOt2OUSo0HgmO4KoNHpl74h7JTHZBzIxDrNZBuyVWn39vaAkdRbgKMoNX4NWa34gywIPoa'},
+  {name:'Srey Hong',token:'EABBOSyU3fK0BSCzRZCZCZASmW0ARcXcZB1WZC0KuPRZAH7htEjwoOLC4uZBWxxDKzXhhLYOIhbHuDpnoZABbZC0E6ZCUGk9e01M3fBcZCu8HZBKTOgCbR8ZAJqpKR9NBKIZB7DKhFVXI6NzansZBN3CWhJqUsISuP6MnK1iBxE4QOThCI1K2N0Hl4VKKqI3u2vuYwHZAfdZBF'},
+  {name:'Za QB',token:'EAAih5Ur1rnoBSJ2q0PI7yk6eCD9qK7mzZCQwZBiE3gKZCPHsCFX4Hgapmau55hIsgimIzltBo1lgNRpDtveyyrtam0PX4dhoFGpYZCvcyk4B7Q5JTH2qOZCZCgEMzIH2km916eLTZC822OCIBwlfRpFqJliyIhq0gsjMupZBs1zJU2o4RPmoZCD2MxZBSzmzxUYvi1'},
+  {name:'So Daney',token:'EAAWnhBvpxW0BSKRoS36WkCv6q9sh5ZBE4obmiVuiLxSw8XZANeIPQA4dVzXoxMT58ffk3OSfGpoRMIS4RrCZA7Ul3NzbpLwHqZA2aeQxt6sAgC5pm5SHXRyPUEwNPZCnJ4Xl3JJiAOoBdp39npZBTefsZAIB6rENIrVAzm9BMZAwKdaC4NAXSM81oO6nj3jN6B86xV0DWm8Vb6EwYsD1'},
+];
+
+// STATE
+var WD = {};
+var dashWeek = '';
+var dashPF = 'all';
+var histWeek = null;
+var dashCalDate = new Date();
+var mcPlatform = 'facebook';
+var mcRowN = 0;
+
+function save(){ try{ localStorage.setItem('smtv5', JSON.stringify(WD)); }catch(e){} }
+function load(){ try{ WD = JSON.parse(localStorage.getItem('smtv5')||'{}'); }catch(e){ WD={}; } }
+function getWeeks(){ return Object.keys(WD).sort().reverse(); }
+function fmt(n){ n=Math.round(n||0); if(n>=1e6) return (n/1e6).toFixed(1)+'M'; if(n>=1000) return (n/1000).toFixed(1)+'K'; return n.toLocaleString(); }
+function ts(){ return new Date().toLocaleString(); }
+function wkLabel(s,e){ var o={day:'2-digit',month:'short',year:'numeric'}; return new Date(s).toLocaleDateString('en-GB',o)+' to '+new Date(e).toLocaleDateString('en-GB',o); }
+function addLog(m){ var el=document.getElementById('col-log'); if(el){el.innerHTML+=m+'<br>';el.scrollTop=el.scrollHeight;} }
+
+// NAV
+function showView(v){
+  document.querySelectorAll('.view').forEach(function(x){x.classList.remove('active');});
+  document.querySelectorAll('.nb').forEach(function(x){x.classList.remove('active');});
+  document.getElementById('view-'+v).classList.add('active');
+  var map={dashboard:0,collect:1,metricool:2,history:3,compare:4,export:5};
+  if(map[v]!==undefined) document.querySelectorAll('.nb')[map[v]].classList.add('active');
+  if(v==='dashboard'){initDash();renderDash();}
+  if(v==='history') renderHist();
+  if(v==='compare') fillCmpSelects();
+  if(v==='export') renderExp();
+  if(v==='metricool') initMcDates();
+}
+
+// DASHBOARD CALENDAR
+function dashCalToggle(){
+  var p=document.getElementById('dash-cal-popup');
+  if(!p) return;
+  if(p.classList.contains('open')){p.classList.remove('open');}
+  else{p.classList.add('open');renderDashCal();renderDashWeeksList();}
+}
+function dashCalClose(){ document.getElementById('dash-cal-popup').classList.remove('open'); }
+function dashCalMove(d){ dashCalDate.setMonth(dashCalDate.getMonth()+d); renderDashCal(); }
+function dashCalToday(){ dashCalDate=new Date(); renderDashCal(); renderDashWeeksList(); }
+
+document.addEventListener('click',function(e){
+  var p=document.getElementById('dash-cal-popup');
+  var b=document.getElementById('dash-cal-btn');
+  if(p&&b&&!p.contains(e.target)&&!b.contains(e.target)) p.classList.remove('open');
+});
+
+function renderDashCal(){
+  var grid=document.getElementById('dash-cal-grid');
+  var ml=document.getElementById('dash-cal-month');
+  if(!grid||!ml) return;
+  var y=dashCalDate.getFullYear(),m=dashCalDate.getMonth();
+  ml.textContent=dashCalDate.toLocaleDateString('en-GB',{month:'long',year:'numeric'});
+  var firstDay=new Date(y,m,1).getDay();
+  var days=new Date(y,m+1,0).getDate();
+  var weeks=getWeeks();
+  var today=new Date(); today.setHours(0,0,0,0);
+  var html='';
+  for(var i=0;i<firstDay;i++) html+='<div></div>';
+  for(var d=1;d<=days;d++){
+    var dt=new Date(y,m,d);
+    var dow=dt.getDay();
+    var monDiff=dow===0?-6:1-dow;
+    var mon=new Date(dt); mon.setDate(dt.getDate()+monDiff);
+    var sun=new Date(mon); sun.setDate(mon.getDate()+6);
+    var mStr=mon.toISOString().slice(0,10);
+    var sStr=sun.toISOString().slice(0,10);
+    var key=mStr+'_'+sStr;
+    var saved=weeks.indexOf(key)>=0;
+    var selected=dashWeek===key;
+    var isToday=dt.getTime()===today.getTime();
+    var selMon=dashWeek?new Date(dashWeek.split('_')[0]):null;
+    var selSun=dashWeek?new Date(dashWeek.split('_')[1]):null;
+    var inRange=selMon&&selSun&&dt>=selMon&&dt<=selSun;
+    var cls='cal-cell';
+    if(saved){
+      if(inRange){
+        var dtStr=dt.toISOString().slice(0,10);
+        cls+=(dtStr===dashWeek.split('_')[0]||dtStr===dashWeek.split('_')[1])?' range-edge':' in-range';
+      } else cls+=' has-data';
+    }
+    if(isToday&&!selected) cls+=' today';
+    var dot=saved&&!inRange?'<div style="width:4px;height:4px;background:var(--accent);border-radius:50%;margin:1px auto 0"></div>':'';
+    var clickAttr=saved?('data-k="'+key+'" data-m="'+mStr+'" data-s="'+sStr+'" onclick="dashCellClick(this)"'):'';
+    html+='<div class="'+cls+'" '+clickAttr+'>'+d+dot+'</div>';
+  }
+  grid.innerHTML=html;
+}
+
+function dashCellClick(el){pickDashWeek(el.getAttribute('data-k'),el.getAttribute('data-m'),el.getAttribute('data-s'));}
+function renderDashWeeksList(){
+  var el=document.getElementById('dash-weeks-list');
+  if(!el) return;
+  var weeks=getWeeks();
+  if(!weeks.length){el.innerHTML='<div style="font-size:12px;color:var(--text3);padding:4px">No saved weeks yet</div>';return;}
+  el.innerHTML=weeks.map(function(w){
+    var pts=w.split('_');
+    var lbl=wkLabel(pts[0],pts[1]);
+    var recs=WD[w]&&WD[w].records?WD[w].records.length:0;
+    var active=dashWeek===w;
+    return '<div class="week-item'+(active?' active':'')+'" data-k="'+w+'" data-m="'+pts[0]+'" data-s="'+pts[1]+'" onclick="dashCellClick(this)"><span>'+lbl+'</span><span style="font-size:10px;opacity:0.6">'+recs+' rec</span></div>';
+  }).join('');
+}
+
+function pickDashWeek(key,s,e){
+  dashWeek=key;
+  dashCalDate=new Date(s);
+  document.getElementById('dash-week-lbl').textContent=wkLabel(s,e);
+  dashCalClose();
+  renderDash();
+  renderDashCal();
+}
+
+function initDash(){
+  var weeks=getWeeks();
+  if(weeks.length>0&&!dashWeek){
+    dashWeek=weeks[0];
+    var pts=weeks[0].split('_');
+    document.getElementById('dash-week-lbl').textContent=wkLabel(pts[0],pts[1]);
+    dashCalDate=new Date(pts[0]);
+  } else if(!weeks.length){
+    document.getElementById('dash-week-lbl').textContent='No data yet';
+  }
+}
+
+// PLATFORM FILTER
+function setPF(f){
+  dashPF=f;
+  ['all','yt','fb','ig','tt'].forEach(function(id,i){
+    var el=document.getElementById('pf-'+id);
+    if(el) el.classList.toggle('active',['all','youtube','facebook','instagram','tiktok'][i]===f);
+  });
+  renderDash();
+}
+
+// RENDER DASHBOARD
+function renderDash(){
+  var wk=dashWeek;
+  if(!wk||!WD[wk]){
+    document.getElementById('dash-totals').innerHTML='';
+    document.getElementById('dash-tbody').innerHTML='<tr><td colspan="13" style="text-align:center;padding:32px;color:var(--text3)">No data yet. Use Collect Weekly or Metricool Entry.</td></tr>';
+    document.getElementById('dash-posts-section').style.display='none';
+    return;
+  }
+  var recs=WD[wk].records.filter(function(r){return dashPF==='all'||r.platform===dashPF;}).slice().sort(function(a,b){return (b.subscribers||0)-(a.subscribers||0);});
+  var tot={subs:0,views:0,reach:0,eng:0,posts:0,pages:recs.length};
+  recs.forEach(function(r){tot.subs+=r.subscribers||0;tot.views+=r.views||0;tot.reach+=r.reach||0;tot.eng+=r.engagement||0;tot.posts+=r.posts||0;});
+  document.getElementById('dash-totals').innerHTML=[
+    ['Pages/Channels',tot.pages],['Subscribers/Fans',tot.subs],
+    ['Views (week)',tot.views],['Reach',tot.reach],['Engagement',tot.eng],['Total Posts',tot.posts]
+  ].map(function(x){return '<div class="mt"><div class="ml">'+x[0]+'</div><div class="mv">'+fmt(x[1])+'</div></div>';}).join('');
+  var postCards=recs.filter(function(r){return r.posts>0;});
+  var pSec=document.getElementById('dash-posts-section');
+  if(postCards.length){
+    pSec.style.display='block';
+    document.getElementById('dash-posts-grid').innerHTML=postCards.map(function(r){
+      var bc=r.platform==='youtube'?'#cc0000':r.platform==='instagram'?'#c13584':r.platform==='tiktok'?'#333':'#1877f2';
+      return '<div class="post-tile" style="border-left:3px solid '+bc+'"><div style="font-size:10px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px" title="'+r.name+'">'+r.name+'</div><div style="font-size:20px;font-weight:700">'+fmt(r.posts)+'</div><div style="font-size:10px;color:var(--text3);margin-top:2px">'+(r.platform==='youtube'?'videos':'posts')+'</div><div style="font-size:10px;color:var(--text2);font-weight:500;margin-top:3px">'+(r.lastPostDate||'')+'</div></div>';
+    }).join('');
+  } else pSec.style.display='none';
+  document.getElementById('dash-tbody').innerHTML=recs.length?recs.map(function(r){
+    var bc=r.platform==='youtube'?'byt':r.platform==='instagram'?'big':r.platform==='tiktok'?'btt':'bfb';
+    return '<tr><td><span class="badge '+bc+'">'+r.platform+'</span></td><td style="font-size:11px;color:var(--text2)">'+r.account+'</td><td><strong>'+r.name+'</strong></td><td class="num">'+fmt(r.subscribers)+'</td><td class="num">'+fmt(r.views)+'</td><td class="num">'+fmt(r.reach)+'</td><td class="num">'+fmt(r.engagement)+'</td><td class="num">'+fmt(r.likes)+'</td><td class="num">'+fmt(r.comments)+'</td><td class="num">'+fmt(r.shares)+'</td><td class="num">'+fmt(r.posts)+'</td><td style="font-size:12px;color:var(--text2)">'+(r.lastPostDate||'')+'</td><td style="font-size:11px;color:var(--text3)">'+(r.collected||'')+'</td></tr>';
+  }).join(''):'<tr><td colspan="13" style="text-align:center;padding:20px;color:var(--text3)">No data for this filter.</td></tr>';
+}
+
+// COLLECT
+function getColPeriod(){
+  var s=document.getElementById('col-start').value;
+  var e=document.getElementById('col-end').value;
+  if(!s||!e){showColAlert('error','Please select start and end dates.');return null;}
+  return {start:s,end:e,key:s+'_'+e};
+}
+function initWeekData(key,s,e){if(!WD[key])WD[key]={start:s,end:e,records:[],at:ts()};}
+function showColAlert(type,msg){var el=document.getElementById('col-alert');if(el)el.innerHTML='<div class="alert '+type+'">'+msg+'</div>';}
+function setColDates(){
+  var today=new Date(),dow=today.getDay(),diff=dow===0?-6:1-dow;
+  var mon=new Date(today);mon.setDate(today.getDate()+diff);
+  var sun=new Date(mon);sun.setDate(mon.getDate()+6);
+  document.getElementById('col-start').value=mon.toISOString().slice(0,10);
+  document.getElementById('col-end').value=sun.toISOString().slice(0,10);
+  updateColBadge();
+}
+function updateColBadge(){
+  var s=document.getElementById('col-start').value,e=document.getElementById('col-end').value;
+  var b=document.getElementById('col-badge');
+  if(s&&e){b.textContent=wkLabel(s,e);b.style.display='inline-block';}else b.style.display='none';
+}
+
+async function collectYT(){
+  var p=getColPeriod();if(!p)return;
+  initWeekData(p.key,p.start,p.end);
+  var prog=document.getElementById('col-progress');
+  document.getElementById('col-log').innerHTML='';
+  prog.innerHTML='<div class="loading"><div class="spin"></div>Starting YouTube...</div><div class="pbar"><div class="pfill" id="yt-pf" style="width:0%"></div></div>';
+  var sISO=p.start+'T00:00:00Z',eISO=p.end+'T23:59:59Z';
+  var ok=0,fail=0;
+  for(var i=0;i<YT_CH.length;i++){
+    var ch=YT_CH[i];
+    var pfEl=document.getElementById('yt-pf');
+    if(pfEl) pfEl.style.width=((i+1)/YT_CH.length*100)+'%';
+    prog.querySelector('.loading').innerHTML='<div class="spin"></div>YouTube: '+ch.name+' ('+(i+1)+'/'+YT_CH.length+')';
+    try{
+      var r=await fetch('https://www.googleapis.com/youtube/v3/channels?part=statistics,snippet&id='+ch.id+'&key='+YT_KEY);
+      var d=await r.json();
+      if(d.items&&d.items[0]){
+        var s2=d.items[0].statistics;
+        var totalSubs=parseInt(s2.subscriberCount)||0;
+        var weekViews=0,weekLikes=0,weekComments=0,weekPosts=0,lastPostDate='';
+        try{
+          var wr=await fetch('https://www.googleapis.com/youtube/v3/search?part=snippet&channelId='+ch.id+'&order=date&maxResults=50&type=video&publishedAfter='+sISO+'&publishedBefore='+eISO+'&key='+YT_KEY);
+          var wd=await wr.json();
+          if(wd.items&&wd.items.length>0){
+            weekPosts=wd.items.length;
+            var vids=wd.items.map(function(v){return v.id.videoId;}).filter(Boolean).join(',');
+            if(vids){
+              var vr=await fetch('https://www.googleapis.com/youtube/v3/videos?part=statistics&id='+vids+'&key='+YT_KEY);
+              var vd=await vr.json();
+              if(vd.items)vd.items.forEach(function(v){weekViews+=parseInt(v.statistics.viewCount)||0;weekLikes+=parseInt(v.statistics.likeCount)||0;weekComments+=parseInt(v.statistics.commentCount)||0;});
+            }
+            lastPostDate=new Date(wd.items[0].snippet.publishedAt).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+          } else {
+            var lr=await fetch('https://www.googleapis.com/youtube/v3/search?part=snippet&channelId='+ch.id+'&order=date&maxResults=1&type=video&key='+YT_KEY);
+            var ld=await lr.json();
+            if(ld.items&&ld.items[0])lastPostDate=new Date(ld.items[0].snippet.publishedAt).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+          }
+        }catch(e2){}
+        var rec={platform:'youtube',account:'mediapro.kh',name:ch.name,channelId:ch.id,url:'https://youtube.com/channel/'+ch.id,subscribers:totalSubs,views:weekViews,reach:weekViews,engagement:weekLikes+weekComments,likes:weekLikes,comments:weekComments,shares:0,posts:weekPosts,lastPostDate:lastPostDate,collected:ts()};
+        WD[p.key].records=WD[p.key].records.filter(function(x){return !(x.platform==='youtube'&&x.channelId===ch.id);});
+        WD[p.key].records.push(rec);
+        addLog('YT: '+ch.name+' — '+fmt(totalSubs)+' subs / '+weekPosts+' posts this week');
+        ok++;
+      }else{addLog('YT: '+ch.name+' — no data');fail++;}
+    }catch(ex){addLog('YT ERROR: '+ch.name+' — '+ex.message);fail++;}
+    await new Promise(function(r){setTimeout(r,300);});
+  }
+  save();
+  prog.innerHTML='<div class="alert success">YouTube done: '+ok+' channels. Week: '+p.start+' to '+p.end+'</div>';
+  fillCmpSelects();updateExpSelect();
+}
+
+async function collectFB(){
+  var p=getColPeriod();if(!p)return;
+  initWeekData(p.key,p.start,p.end);
+  var prog=document.getElementById('col-progress');
+  document.getElementById('col-log').innerHTML='';
+  prog.innerHTML='<div class="loading"><div class="spin"></div>Starting Facebook...</div><div class="pbar"><div class="pfill" id="fb-pf" style="width:0%"></div></div>';
+  var sinceTs=Math.floor(new Date(p.start+'T00:00:00Z').getTime()/1000);
+  var untilTs=Math.floor(new Date(p.end+'T23:59:59Z').getTime()/1000);
+  var totalPages=0,failedAcc=0;
+  for(var i=0;i<FB_ACC.length;i++){
+    var acc=FB_ACC[i];
+    var pfEl=document.getElementById('fb-pf');
+    if(pfEl) pfEl.style.width=((i+1)/FB_ACC.length*100)+'%';
+    prog.querySelector('.loading').innerHTML='<div class="spin"></div>Facebook: '+acc.name+' ('+(i+1)+'/'+FB_ACC.length+')';
+    try{
+      var r=await fetch('https://graph.facebook.com/v19.0/me/accounts?fields=id,name,fan_count,followers_count,link,access_token&limit=100&access_token='+acc.token);
+      var d=await r.json();
+      if(d.error){addLog('FB '+acc.name+': '+d.error.message);failedAcc++;continue;}
+      var pages=d.data||[];
+      if(!pages.length){addLog('FB '+acc.name+': 0 pages — add pages_show_list permission');failedAcc++;continue;}
+      addLog('FB '+acc.name+': '+pages.length+' pages');
+      for(var j=0;j<pages.length;j++){
+        var pg=pages[j];
+        var pageToken=pg.access_token||acc.token;
+        var reach=0,engagement=0,impressions=0,weekLikes=0,weekComments=0,weekShares=0,weekPosts=0,lastPost='';
+        try{
+          var ir=await fetch('https://graph.facebook.com/v19.0/'+pg.id+'/insights?metric=page_impressions_unique,page_post_engagements,page_impressions&period=week&access_token='+pageToken);
+          var id2=await ir.json();
+          if(id2.data&&!id2.error)id2.data.forEach(function(m){var v=m.values&&m.values.length>0?m.values[m.values.length-1].value:0;var val=typeof v==='number'?v:0;if(m.name==='page_impressions_unique')reach=val;if(m.name==='page_post_engagements')engagement=val;if(m.name==='page_impressions')impressions=val;});
+        }catch(e2){}
+        try{
+          var pr=await fetch('https://graph.facebook.com/v19.0/'+pg.id+'/posts?fields=id,created_time,likes.summary(true),comments.summary(true),shares&since='+sinceTs+'&until='+untilTs+'&limit=100&access_token='+pageToken);
+          var pd=await pr.json();
+          if(pd.data&&pd.data.length>0){weekPosts=pd.data.length;pd.data.forEach(function(post){weekLikes+=post.likes&&post.likes.summary?post.likes.summary.total_count||0:0;weekComments+=post.comments&&post.comments.summary?post.comments.summary.total_count||0:0;weekShares+=post.shares?post.shares.count||0:0;});lastPost=new Date(pd.data[0].created_time).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});}
+          else{var lpr=await fetch('https://graph.facebook.com/v19.0/'+pg.id+'/posts?fields=created_time&limit=1&access_token='+pageToken);var lpd=await lpr.json();if(lpd.data&&lpd.data[0])lastPost=new Date(lpd.data[0].created_time).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});}
+        }catch(e2){}
+        var rec={platform:'facebook',account:acc.name,name:pg.name,pageId:pg.id,url:pg.link||'',subscribers:pg.fan_count||pg.followers_count||0,views:impressions,reach:reach,engagement:engagement,likes:weekLikes,comments:weekComments,shares:weekShares,posts:weekPosts,lastPostDate:lastPost,collected:ts()};
+        WD[p.key].records=WD[p.key].records.filter(function(x){return !(x.platform==='facebook'&&x.pageId===pg.id);});
+        WD[p.key].records.push(rec);
+        totalPages++;
+      }
+    }catch(ex){addLog('FB ERROR: '+acc.name+' — '+ex.message);failedAcc++;}
+    await new Promise(function(r){setTimeout(r,400);});
+  }
+  save();
+  prog.innerHTML='<div class="alert success">Facebook done: '+totalPages+' pages from '+(FB_ACC.length-failedAcc)+' accounts.</div>';
+  fillCmpSelects();updateExpSelect();
+}
+
+async function collectAll(){document.getElementById('col-log').innerHTML='';await collectYT();await collectFB();}
+
+// METRICOOL MANUAL ENTRY
+function setMcPlatform(plat){
+  mcPlatform=plat;
+  ['fb','ig','tt'].forEach(function(id,i){var el=document.getElementById('mc-tab-'+id);if(el)el.classList.toggle('active',['facebook','instagram','tiktok'][i]===plat);});
+  var titles={facebook:'FACEBOOK PAGES',instagram:'INSTAGRAM ACCOUNTS',tiktok:'TIKTOK ACCOUNTS'};
+  document.getElementById('mc-plat-title').textContent=titles[plat];
+  clearMcRows();addMcRow();
+}
+
+function addMcRow(){
+  mcRowN++;
+  var n=mcRowN;
+  var div=document.createElement('div');
+  div.className='mc-grid';
+  div.id='mc-r-'+n;
+  var fields=['name','followers','reach','impressions','engagement','likes','comments','posts'];
+  var types=['text','number','number','number','number','number','number','number'];
+  var phs=['Page name','0','0','0','0','0','0','0'];
+  div.innerHTML=fields.map(function(f,i){
+    return '<input type="'+types[i]+'" id="mcf-'+n+'-'+f+'" placeholder="'+phs[i]+'">';
+  }).join('')+'<button onclick="this.parentElement.remove()" style="border:none;background:none;cursor:pointer;color:var(--danger);font-size:18px;line-height:1">x</button>';
+  document.getElementById('mc-rows').appendChild(div);
+}
+
+function clearMcRows(){document.getElementById('mc-rows').innerHTML='';mcRowN=0;}
+
+function saveMcData(){
+  var s=document.getElementById('mc-start').value;
+  var e=document.getElementById('mc-end').value;
+  if(!s||!e){showMcAlert('error','Select week dates first.');return;}
+  var key=s+'_'+e;
+  if(!WD[key])WD[key]={start:s,end:e,records:[],at:ts()};
+  var rows=document.querySelectorAll('[id^="mc-r-"]');
+  if(!rows.length){showMcAlert('error','Add at least one page.');return;}
+  var saved=0;
+  rows.forEach(function(row){
+    var n=row.id.replace('mc-r-','');
+    var name=(document.getElementById('mcf-'+n+'-name')||{}).value||'';
+    if(!name.trim()) return;
+    var rec={
+      platform:mcPlatform,account:'Metricool',name:name.trim(),url:'',
+      subscribers:parseInt((document.getElementById('mcf-'+n+'-followers')||{}).value)||0,
+      views:parseInt((document.getElementById('mcf-'+n+'-impressions')||{}).value)||0,
+      reach:parseInt((document.getElementById('mcf-'+n+'-reach')||{}).value)||0,
+      engagement:parseInt((document.getElementById('mcf-'+n+'-engagement')||{}).value)||0,
+      likes:parseInt((document.getElementById('mcf-'+n+'-likes')||{}).value)||0,
+      comments:parseInt((document.getElementById('mcf-'+n+'-comments')||{}).value)||0,
+      shares:0,posts:parseInt((document.getElementById('mcf-'+n+'-posts')||{}).value)||0,
+      lastPostDate:'',collected:ts(),source:'metricool'
+    };
+    WD[key].records=WD[key].records.filter(function(r){return !(r.platform===mcPlatform&&r.name===rec.name&&r.source==='metricool');});
+    WD[key].records.push(rec);
+    saved++;
+  });
+  save();
+  showMcAlert('success','Saved '+saved+' '+mcPlatform+' pages for '+wkLabel(s,e));
+  clearMcRows();addMcRow();
+  fillCmpSelects();updateExpSelect();
+}
+
+function showMcAlert(type,msg){
+  var el=document.getElementById('mc-alert');
+  el.innerHTML='<div class="alert '+type+'">'+msg+'</div>';
+  setTimeout(function(){el.innerHTML='';},4000);
+}
+
+function updateMcBadge(){
+  var s=document.getElementById('mc-start').value,e=document.getElementById('mc-end').value;
+  var b=document.getElementById('mc-badge');
+  if(s&&e){b.textContent=wkLabel(s,e);b.style.display='inline-block';}else b.style.display='none';
+}
+
+function initMcDates(){
+  var today=new Date(),dow=today.getDay(),diff=dow===0?-6:1-dow;
+  var mon=new Date(today);mon.setDate(today.getDate()+diff);
+  var sun=new Date(mon);sun.setDate(mon.getDate()+6);
+  document.getElementById('mc-start').value=mon.toISOString().slice(0,10);
+  document.getElementById('mc-end').value=sun.toISOString().slice(0,10);
+  updateMcBadge();
+  if(!document.querySelector('[id^="mc-r-"]'))addMcRow();
+}
+
+// HISTORY
+function renderHist(){
+  var weeks=getWeeks();
+  var list=document.getElementById('hist-list');
+  if(!weeks.length){list.innerHTML='<div style="padding:16px;font-size:13px;color:var(--text3)">No saved weeks.</div>';return;}
+  var html='';
+  weeks.forEach(function(w){
+    var pts=w.split('_');
+    var recs=WD[w]&&WD[w].records?WD[w].records.length:0;
+    var active=histWeek===w;
+    var bg=active?'var(--accent-bg)':'transparent';
+    var fw=active?'600':'400';
+    var col=active?'var(--accent-text)':'var(--text)';
+    var lbl=wkLabel(pts[0],pts[1]);
+    var div=document.createElement('div');
+    div.style.cssText='display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer;background:'+bg;
+    div.dataset.w=w;
+    div.onclick=function(){viewHist(this.dataset.w);};
+    div.innerHTML='<div><div style="font-weight:'+fw+';color:'+col+'">'+lbl+'</div><div style="font-size:11px;color:var(--text3)">'+recs+' records</div></div><button style="border:none;background:none;cursor:pointer;color:var(--danger);font-size:12px">Del</button>';
+    div.querySelector('button').onclick=function(e){e.stopPropagation();delWeek(div.dataset.w);};
+    html+=div.outerHTML;
+  });
+  list.innerHTML=html;
+}
+
+function viewHist(wk){
+  histWeek=wk;renderHist();
+  var pts=wk.split('_');
+  document.getElementById('hist-title').textContent=wkLabel(pts[0],pts[1])+' ('+WD[wk].records.length+' records)';
+  var recs=WD[wk].records.slice().sort(function(a,b){return (b.subscribers||0)-(a.subscribers||0);});
+  document.getElementById('hist-tbody').innerHTML=recs.map(function(r){
+    var bc=r.platform==='youtube'?'byt':r.platform==='instagram'?'big':r.platform==='tiktok'?'btt':'bfb';
+    return '<tr><td><span class="badge '+bc+'">'+r.platform+'</span></td><td><strong>'+r.name+'</strong><br><small style="color:var(--text3)">'+r.account+'</small></td><td class="num">'+fmt(r.subscribers)+'</td><td class="num">'+fmt(r.views)+'</td><td class="num">'+fmt(r.reach)+'</td><td class="num">'+fmt(r.engagement)+'</td><td class="num">'+fmt(r.likes)+'</td><td class="num">'+fmt(r.comments)+'</td><td class="num">'+fmt(r.posts)+'</td><td style="font-size:12px;color:var(--text2)">'+(r.lastPostDate||'')+'</td></tr>';
+  }).join('');
+}
+
+function delCellClick(el){delWeek(el.getAttribute('data-dw'));}
+function delWeek(wk){if(confirm('Delete this week?')){delete WD[wk];save();if(histWeek===wk){histWeek=null;document.getElementById('hist-title').textContent='Select a week';document.getElementById('hist-tbody').innerHTML='';}renderHist();}}
+
+// COMPARE
+function fillCmpSelects(){
+  var weeks=getWeeks();
+  var opts='<option value="">Select week</option>'+weeks.map(function(w){var pts=w.split('_');return '<option value="'+w+'">'+wkLabel(pts[0],pts[1])+'</option>';}).join('');
+  ['cmp-a','cmp-b'].forEach(function(id){var el=document.getElementById(id);if(!el)return;var prev=el.value;el.innerHTML=opts;if(prev&&weeks.indexOf(prev)>=0)el.value=prev;});
+  if(weeks.length>=2){var a=document.getElementById('cmp-a'),b=document.getElementById('cmp-b');if(a&&!a.value)a.value=weeks[1];if(b&&!b.value)b.value=weeks[0];}
+}
+
+function renderCompare(){
+  var wa=document.getElementById('cmp-a').value,wb=document.getElementById('cmp-b').value;
+  var plat=document.getElementById('cmp-plat').value;
+  var el=document.getElementById('cmp-results');
+  if(!wa||!wb){el.innerHTML='';return;}
+  if(wa===wb){el.innerHTML='<div class="alert info">Select two different weeks.</div>';return;}
+  var filt=function(r){return plat==='all'||r.platform===plat;};
+  var ra=WD[wa]?WD[wa].records.filter(filt):[];
+  var rb=WD[wb]?WD[wb].records.filter(filt):[];
+  var METS=['subscribers','views','reach','engagement','likes','comments','shares','posts'];
+  var LBLS={subscribers:'Subscribers',views:'Views',reach:'Reach',engagement:'Engagement',likes:'Likes',comments:'Comments',shares:'Shares',posts:'Total Posts'};
+  var tA={},tB={};
+  METS.forEach(function(m){tA[m]=0;tB[m]=0;});
+  ra.forEach(function(r){METS.forEach(function(m){tA[m]+=(r[m]||0);});});
+  rb.forEach(function(r){METS.forEach(function(m){tB[m]+=(r[m]||0);});});
+  var pts_a=wa.split('_'),pts_b=wb.split('_');
+  var html='<div style="font-size:12px;color:var(--text2);margin-bottom:12px;padding:8px 12px;background:var(--bg);border-radius:var(--radius)">Week A: <strong>'+wkLabel(pts_a[0],pts_a[1])+'</strong> vs Week B: <strong>'+wkLabel(pts_b[0],pts_b[1])+'</strong></div>';
+  html+='<div class="cmp-grid">';
+  METS.forEach(function(m){
+    var diff=tB[m]-tA[m];
+    var pct=tA[m]?((diff/tA[m])*100).toFixed(1):'0';
+    var cls=diff>0?'up':diff<0?'down':'flat';
+    var arrow=diff>0?'UP':diff<0?'DOWN':'';
+    var border=diff>0?'border:2px solid #1877f2;background:#e7f0fd':diff<0?'border:2px solid #c92a2a;background:#fff5f5':'border:1px solid var(--border)';
+    var valCol=diff>0?'color:#1877f2':diff<0?'color:#c92a2a':'';
+    html+='<div class="cmp-tile" style="'+border+'"><div class="cl">'+LBLS[m]+'</div><div class="cv" style="'+valCol+'">'+fmt(tB[m])+'</div><div class="cp">Week A: '+fmt(tA[m])+'</div><div class="cd '+cls+'">'+(diff===0?'No change':(diff>0?'Up ':'Down ')+fmt(Math.abs(diff))+' ('+pct+'%)')+'</div></div>';
+  });
+  html+='</div>';
+  var allNames=[];
+  ra.concat(rb).forEach(function(r){if(allNames.indexOf(r.name)<0)allNames.push(r.name);});
+  html+='<div class="tw"><table><thead><tr><th>Platform</th><th>Page</th><th>Subs A</th><th>Subs B</th><th>Growth</th><th>Views A</th><th>Views B</th><th>Reach A</th><th>Reach B</th><th>Posts A</th><th>Posts B</th></tr></thead><tbody>';
+  allNames.sort().forEach(function(name){
+    var rA=ra.find(function(r){return r.name===name;});
+    var rB=rb.find(function(r){return r.name===name;});
+    var sA=rA?rA.subscribers||0:0,sB=rB?rB.subscribers||0:0;
+    var diff=sB-sA;
+    var cls=diff>0?'up':diff<0?'down':'flat';
+    var plat2=(rA||rB).platform||'';
+    var bc=plat2==='youtube'?'byt':plat2==='instagram'?'big':plat2==='tiktok'?'btt':'bfb';
+    var rowBg=diff>0?'background:#f0f4ff':diff<0?'background:#fff5f5':'';
+    html+='<tr style="'+rowBg+'"><td><span class="badge '+bc+'">'+plat2+'</span></td><td><strong>'+name+'</strong></td><td class="num">'+fmt(sA)+'</td><td class="num">'+fmt(sB)+'</td><td class="num '+cls+'" style="font-weight:700">'+(diff===0?'':'(diff>0 ? "Up " : "Down ")'+(diff>0?'Up ':'Down ')+fmt(Math.abs(diff)))+'</td><td class="num">'+fmt(rA?rA.views||0:0)+'</td><td class="num">'+fmt(rB?rB.views||0:0)+'</td><td class="num">'+fmt(rA?rA.reach||0:0)+'</td><td class="num">'+fmt(rB?rB.reach||0:0)+'</td><td class="num">'+fmt(rA?rA.posts||0:0)+'</td><td class="num">'+fmt(rB?rB.posts||0:0)+'</td></tr>';
+  });
+  html+='</tbody></table></div>';
+  el.innerHTML=html;
+}
+
+// EXPORT
+function updateExpSelect(){
+  var weeks=getWeeks();
+  var el=document.getElementById('exp-week');
+  if(!el)return;
+  el.innerHTML='<option value="all">All weeks</option>'+weeks.map(function(w){var pts=w.split('_');return '<option value="'+w+'">'+wkLabel(pts[0],pts[1])+'</option>';}).join('');
+}
+
+function renderExp(){
+  updateExpSelect();
+  var wk=document.getElementById('exp-week').value;
+  var plat=document.getElementById('exp-plat').value;
+  var recs=[];
+  if(wk==='all'){Object.entries(WD).forEach(function(e){var pts=e[0].split('_');e[1].records.forEach(function(r){recs.push(Object.assign({},r,{weekStart:pts[0],weekEnd:pts[1]}));});});}
+  else if(WD[wk]){var pts=wk.split('_');recs=WD[wk].records.map(function(r){return Object.assign({},r,{weekStart:pts[0],weekEnd:pts[1]});});}
+  if(plat!=='all')recs=recs.filter(function(r){return r.platform===plat;});
+  recs.sort(function(a,b){return b.weekStart.localeCompare(a.weekStart)||(b.subscribers||0)-(a.subscribers||0);});
+  var tbody=document.getElementById('exp-tbody');
+  tbody.innerHTML=recs.length?recs.map(function(r){
+    var bc=r.platform==='youtube'?'byt':r.platform==='instagram'?'big':r.platform==='tiktok'?'btt':'bfb';
+    return '<tr><td style="font-size:11px">'+r.weekStart+' to '+r.weekEnd+'</td><td><span class="badge '+bc+'">'+r.platform+'</span></td><td style="font-size:11px;color:var(--text2)">'+r.account+'</td><td>'+r.name+'</td><td class="num">'+fmt(r.subscribers)+'</td><td class="num">'+fmt(r.views)+'</td><td class="num">'+fmt(r.reach)+'</td><td class="num">'+fmt(r.engagement)+'</td><td class="num">'+fmt(r.likes)+'</td><td class="num">'+fmt(r.comments)+'</td><td class="num">'+fmt(r.posts)+'</td><td style="font-size:11px;color:var(--text2)">'+(r.lastPostDate||'')+'</td></tr>';
+  }).join(''):'<tr><td colspan="12" style="text-align:center;padding:20px;color:var(--text3)">No data.</td></tr>';
+}
+
+function doExportCSV(){
+  var wk=document.getElementById('exp-week').value,plat=document.getElementById('exp-plat').value;
+  var recs=[];
+  if(wk==='all'){Object.entries(WD).forEach(function(e){var pts=e[0].split('_');e[1].records.forEach(function(r){recs.push(Object.assign({},r,{weekStart:pts[0],weekEnd:pts[1]}));});});}
+  else if(WD[wk]){var pts=wk.split('_');recs=WD[wk].records.map(function(r){return Object.assign({},r,{weekStart:pts[0],weekEnd:pts[1]});});}
+  if(plat!=='all')recs=recs.filter(function(r){return r.platform===plat;});
+  if(!recs.length){alert('No data.');return;}
+  var h=['weekStart','weekEnd','platform','account','name','subscribers','views','reach','engagement','likes','comments','shares','posts','lastPostDate'];
+  var nl='\n';var csv=[h.join(',')].concat(recs.map(function(r){return h.map(function(k){var v=String(r[k]||'').replace(/"/g,'""');return '"'+v+'"';}).join(',');})).join(nl);
+  var a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download='sm_weekly_'+new Date().toISOString().slice(0,10)+'.csv';a.click();
+}
+
+function doCopyText(){
+  var weeks=getWeeks();if(!weeks.length){alert('No data.');return;}
+  var t='SM Weekly Report\n\n';
+  weeks.forEach(function(wk){var pts=wk.split('_');t+='Week: '+wkLabel(pts[0],pts[1])+'\n';WD[wk].records.slice(0,5).forEach(function(r){t+='  '+r.name+': '+fmt(r.subscribers)+' followers\n';});t+='\n';});
+  navigator.clipboard.writeText(t).then(function(){alert('Copied!');});
+}
+
+function clearAll(){if(confirm('Delete ALL data?')){WD={};save();dashWeek='';document.getElementById('dash-week-lbl').textContent='Select week';renderDash();renderHist();}}
+
+// INIT
+load();
+setColDates();
+document.getElementById('col-start').addEventListener('change',updateColBadge);
+document.getElementById('col-end').addEventListener('change',updateColBadge);
+fillCmpSelects();updateExpSelect();initDash();renderDash();renderDashCal();renderDashWeeksList();
+</script>
+</body>
+</html>
