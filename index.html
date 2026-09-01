@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -324,38 +325,7 @@ const FB_ACC = [
   {name:'Za QB'},
   {name:'So Daney'},
 ];
- async function collectFB(){
-  var p=getColPeriod();if(!p)return;
-  initWeekData(p.key,p.start,p.end);
-  var prog=document.getElementById('col-progress');
-  document.getElementById('col-log').innerHTML='';
-  prog.innerHTML='<div class="loading"><div class="spin"></div>Starting Facebook...</div><div class="pbar"><div class="pfill" id="fb-pf" style="width:0%"></div></div>';
-  var totalPages=0,failedAcc=0;
-  for(var i=0;i<FB_ACC.length;i++){
-    var acc=FB_ACC[i];
-    var pfEl=document.getElementById('fb-pf');
-    if(pfEl) pfEl.style.width=((i+1)/FB_ACC.length*100)+'%';
-    prog.querySelector('.loading').innerHTML='<div class="spin"></div>Facebook: '+acc.name+' ('+(i+1)+'/'+FB_ACC.length+')';
-    try{
-      var r=await fetch(FB_PROXY_URL+'/?acc='+i+'&start='+p.start+'&end='+p.end);
-      var d=await r.json();
-      if(d.error){addLog('FB '+acc.name+': '+d.error);failedAcc++;continue;}
-      var pages=d.records||[];
-      if(!pages.length){addLog('FB '+acc.name+': 0 pages returned');failedAcc++;continue;}
-      addLog('FB '+acc.name+': '+pages.length+' pages');
-      pages.forEach(function(pg){
-        var lastPostFmt = pg.lastPostDate ? new Date(pg.lastPostDate).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '';
-        var rec={platform:'facebook',account:acc.name,name:pg.name,pageId:pg.pageId,url:pg.url||'',subscribers:pg.subscribers||0,views:pg.views||0,reach:pg.reach||0,engagement:pg.engagement||0,likes:pg.likes||0,comments:pg.comments||0,shares:pg.shares||0,posts:pg.posts||0,lastPostDate:lastPostFmt,collected:ts()};
-        WD[p.key].records=WD[p.key].records.filter(function(x){return !(x.platform==='facebook'&&x.pageId===pg.pageId);});
-        WD[p.key].records.push(rec);
-        totalPages++;
-      });
-    }catch(ex){addLog('FB ERROR: '+acc.name+' — '+ex.message);failedAcc++;}
-    await new Promise(function(r){setTimeout(r,300);});
-  }
-  save();
-  prog.innerHTML='<div class="alert success">Facebook done: '+totalPages+' pages from '+(FB_ACC.length-failedAcc)+' accounts.</div>';
-  fillCmpSelects();updateExpSelect();
+
 // STATE
 var WD = {};
 var dashWeek = '';
@@ -604,8 +574,6 @@ async function collectFB(){
   var prog=document.getElementById('col-progress');
   document.getElementById('col-log').innerHTML='';
   prog.innerHTML='<div class="loading"><div class="spin"></div>Starting Facebook...</div><div class="pbar"><div class="pfill" id="fb-pf" style="width:0%"></div></div>';
-  var sinceTs=Math.floor(new Date(p.start+'T00:00:00Z').getTime()/1000);
-  var untilTs=Math.floor(new Date(p.end+'T23:59:59Z').getTime()/1000);
   var totalPages=0,failedAcc=0;
   for(var i=0;i<FB_ACC.length;i++){
     var acc=FB_ACC[i];
@@ -613,34 +581,21 @@ async function collectFB(){
     if(pfEl) pfEl.style.width=((i+1)/FB_ACC.length*100)+'%';
     prog.querySelector('.loading').innerHTML='<div class="spin"></div>Facebook: '+acc.name+' ('+(i+1)+'/'+FB_ACC.length+')';
     try{
-      var r=await fetch('https://graph.facebook.com/v19.0/me/accounts?fields=id,name,fan_count,followers_count,link,access_token&limit=100&access_token='+acc.token);
+      var r=await fetch(FB_PROXY_URL+'/?acc='+i+'&start='+p.start+'&end='+p.end);
       var d=await r.json();
-      if(d.error){addLog('FB '+acc.name+': '+d.error.message);failedAcc++;continue;}
-      var pages=d.data||[];
-      if(!pages.length){addLog('FB '+acc.name+': 0 pages — add pages_show_list permission');failedAcc++;continue;}
+      if(d.error){addLog('FB '+acc.name+': '+d.error);failedAcc++;continue;}
+      var pages=d.records||[];
+      if(!pages.length){addLog('FB '+acc.name+': 0 pages returned');failedAcc++;continue;}
       addLog('FB '+acc.name+': '+pages.length+' pages');
-      for(var j=0;j<pages.length;j++){
-        var pg=pages[j];
-        var pageToken=pg.access_token||acc.token;
-        var reach=0,engagement=0,impressions=0,weekLikes=0,weekComments=0,weekShares=0,weekPosts=0,lastPost='';
-        try{
-          var ir=await fetch('https://graph.facebook.com/v19.0/'+pg.id+'/insights?metric=page_impressions_unique,page_post_engagements,page_impressions&period=week&access_token='+pageToken);
-          var id2=await ir.json();
-          if(id2.data&&!id2.error)id2.data.forEach(function(m){var v=m.values&&m.values.length>0?m.values[m.values.length-1].value:0;var val=typeof v==='number'?v:0;if(m.name==='page_impressions_unique')reach=val;if(m.name==='page_post_engagements')engagement=val;if(m.name==='page_impressions')impressions=val;});
-        }catch(e2){}
-        try{
-          var pr=await fetch('https://graph.facebook.com/v19.0/'+pg.id+'/posts?fields=id,created_time,likes.summary(true),comments.summary(true),shares&since='+sinceTs+'&until='+untilTs+'&limit=100&access_token='+pageToken);
-          var pd=await pr.json();
-          if(pd.data&&pd.data.length>0){weekPosts=pd.data.length;pd.data.forEach(function(post){weekLikes+=post.likes&&post.likes.summary?post.likes.summary.total_count||0:0;weekComments+=post.comments&&post.comments.summary?post.comments.summary.total_count||0:0;weekShares+=post.shares?post.shares.count||0:0;});lastPost=new Date(pd.data[0].created_time).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});}
-          else{var lpr=await fetch('https://graph.facebook.com/v19.0/'+pg.id+'/posts?fields=created_time&limit=1&access_token='+pageToken);var lpd=await lpr.json();if(lpd.data&&lpd.data[0])lastPost=new Date(lpd.data[0].created_time).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});}
-        }catch(e2){}
-        var rec={platform:'facebook',account:acc.name,name:pg.name,pageId:pg.id,url:pg.link||'',subscribers:pg.fan_count||pg.followers_count||0,views:impressions,reach:reach,engagement:engagement,likes:weekLikes,comments:weekComments,shares:weekShares,posts:weekPosts,lastPostDate:lastPost,collected:ts()};
-        WD[p.key].records=WD[p.key].records.filter(function(x){return !(x.platform==='facebook'&&x.pageId===pg.id);});
+      pages.forEach(function(pg){
+        var lastPostFmt = pg.lastPostDate ? new Date(pg.lastPostDate).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '';
+        var rec={platform:'facebook',account:acc.name,name:pg.name,pageId:pg.pageId,url:pg.url||'',subscribers:pg.subscribers||0,views:pg.views||0,reach:pg.reach||0,engagement:pg.engagement||0,likes:pg.likes||0,comments:pg.comments||0,shares:pg.shares||0,posts:pg.posts||0,lastPostDate:lastPostFmt,collected:ts()};
+        WD[p.key].records=WD[p.key].records.filter(function(x){return !(x.platform==='facebook'&&x.pageId===pg.pageId);});
         WD[p.key].records.push(rec);
         totalPages++;
-      }
+      });
     }catch(ex){addLog('FB ERROR: '+acc.name+' — '+ex.message);failedAcc++;}
-    await new Promise(function(r){setTimeout(r,400);});
+    await new Promise(function(r){setTimeout(r,300);});
   }
   save();
   prog.innerHTML='<div class="alert success">Facebook done: '+totalPages+' pages from '+(FB_ACC.length-failedAcc)+' accounts.</div>';
@@ -818,7 +773,7 @@ function renderCompare(){
     var plat2=(rA||rB).platform||'';
     var bc=plat2==='youtube'?'byt':plat2==='instagram'?'big':plat2==='tiktok'?'btt':'bfb';
     var rowBg=diff>0?'background:#f0f4ff':diff<0?'background:#fff5f5':'';
-    html+='<tr style="'+rowBg+'"><td><span class="badge '+bc+'">'+plat2+'</span></td><td><strong>'+name+'</strong></td><td class="num">'+fmt(sA)+'</td><td class="num">'+fmt(sB)+'</td><td class="num '+cls+'" style="font-weight:700">'+(diff===0?'':'(diff>0 ? "Up " : "Down ")'+(diff>0?'Up ':'Down ')+fmt(Math.abs(diff)))+'</td><td class="num">'+fmt(rA?rA.views||0:0)+'</td><td class="num">'+fmt(rB?rB.views||0:0)+'</td><td class="num">'+fmt(rA?rA.reach||0:0)+'</td><td class="num">'+fmt(rB?rB.reach||0:0)+'</td><td class="num">'+fmt(rA?rA.posts||0:0)+'</td><td class="num">'+fmt(rB?rB.posts||0:0)+'</td></tr>';
+    html+='<tr style="'+rowBg+'"><td><span class="badge '+bc+'">'+plat2+'</span></td><td><strong>'+name+'</strong></td><td class="num">'+fmt(sA)+'</td><td class="num">'+fmt(sB)+'</td><td class="num '+cls+'" style="font-weight:700">'+(diff===0?'':(diff>0?'Up ':'Down ')+fmt(Math.abs(diff)))+'</td><td class="num">'+fmt(rA?rA.views||0:0)+'</td><td class="num">'+fmt(rB?rB.views||0:0)+'</td><td class="num">'+fmt(rA?rA.reach||0:0)+'</td><td class="num">'+fmt(rB?rB.reach||0:0)+'</td><td class="num">'+fmt(rA?rA.posts||0:0)+'</td><td class="num">'+fmt(rB?rB.posts||0:0)+'</td></tr>';
   });
   html+='</tbody></table></div>';
   el.innerHTML=html;
