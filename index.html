@@ -304,24 +304,59 @@ const YT_CH = [
   {name:'An cung minh',id:'UCToFAMrl4znb_EHn8umeClg'},
   {name:'Me and Him',id:'UCw9mMhjEAR4lnvFu_HGJ71w'}
 ];
+const FB_PROXY_URL = 'https://sm-tracker-fb-proxy.ass-manager-7799.workers.dev';
 const FB_ACC = [
-  {name:'Van Rith',token:'EAATjb8DtiU0BSAixiOMLanWa7pFaI2Os4zrb4cZBK9ZCtFnPzHtVGBmZBJzZC6HtnZA247m9CfgJ71BzAiwEnDj5RkpFkhhZCtYVCz1LZAt2b5ZBg31zfH8mw58CRzYDtchoMetfUXTAD6L1f2jjmjrAZCZBy5hfqSO7FY8CsZAqA6M2JZBGQbDphETIA1snTKfaqQGp'},
-  {name:'meymey mol',token:'EAAVUhkp2qQoBSMt2vpebaKYEWQWu8GGGCk8cqE2Mf6tqooZCbO0ZC7mcj3hDkNLYbtKOvcZA0ZAJyl4twY3BDaZB3FljEsIKZAk8UJauDMCxqPLj9VJNA5xpcy0HHsu2Lqc8XyBOLj3zUDNAXv8Fp9vWhAiFvxJ1WUXMRbpKv4Gw5DVZAWrxFZAVG3hMXDYcY5fS'},
-  {name:'Bormey chan',token:'EAAWsvM8guCEBSCBruwBSjMO0gVMR2N80cNpFSFTZBZCJjZC86zTU8h3l3ZA4ifaSuIPBQTZB2jK4c4HakWIpLJPFtvHzDJVXWkbu2ar3KSwZA1npcvFKSPF4WhM4d5Gq2ZAopzIFsuftKAyIAOclX2HfhDJAnTLUNJwSmV7mWeBOlWpIq6BzYWNWqOhkBXYNiQg'},
-  {name:'Ty Srey Ni',token:'EAAYzivQQBIcBSPqMy8mZBaZBMbuiZCPFd01uCmXbCFERpZAgAhhvxfmaitgeAppuu6rZBwDdtxwySQVHMqHZA2ZBTUq8IG5OLohBgLL6ftp3ZAWYtvHIcsbVyugbogT07ZB2zFWQwLpZAAOFISze5hr6ZC4ubI75MEu1BhUMnUKjziSpm3hpnM8tmKVjGbHnzPkLIP0'},
-  {name:'dinnimo',token:'EAAZCU533a2vIBSOMdv2da4QFhVeYZC1lCG8rMTCKZC0XD4G6cAUFPXUQyZBfGcyZCUs1TZBKi3HLF0k0cJVR5dJSmxjQZAz0YxNUyGMBVdHBQmYrVZBVCMobXK603wyKVmK2VCRk9ygE1vaDU8Tk3hyTtfIxlesohX7Xp6ZAX6JdEnLp2k4jLhcuzcZC1IuSC5pM9C'},
-  {name:'Moev Moev',token:'EAAYZClXxQbOcBSJ51t3XtpjTUUN3pS4mTQbKy4vgl8cccv0bZCyE1zjDytP9GkvZCurt2ccrNdTFBlVA85jtlJOz8fdsvIF2y6A5Cbfuo55xaVORRZCBwJ8JpZAsrhBWTPLdffqNFpXhQcZBRbjsZBoIXl1iyEPYr4wyqV7oYEoHuoTR7ZCgwSSGYJsuXEYjBwH5'},
-  {name:'Ha Nguyen',token:'EAAXIWBhi25UBSOfb9I9I33ZChlfwRSTVZBYEF6qAXmDyqWxGA0mMSTZBE9ruBeDjekpFeF2zzeW5k86eNEnZACoQC18gZChpITCQo07ld7vJ2fndqsM2cZCMY5GGoR9OuU3EwRqeZAYNw1ee6vIQhYOy9qmpE44AN2muCb0z1dcXSo0TJUEY9MrQNxlzROTO1Qh'},
-  {name:'nana',token:'EAAWnhBvpxW0BSKRoS36WkCv6q9sh5ZBE4obmiVuiLxSw8XZANeIPQA4dVzXoxMT58ffk3OSfGpoRMIS4RrCZA7Ul3NzbpLwHqZA2aeQxt6sAgC5pm5SHXRyPUEwNPZCnJ4Xl3JJiAOoBdp39npZBTefsZAIB6rENIrVAzm9BMZAwKdaC4NAXSM81oO6nj3jN6B86xV0DWm8Vb6EwYsD1'},
-  {name:'Jee Ka',token:'EAAXCi4lI0xQBSAsvjLgejN94y6k6pbMo6vvZAaZAvPQxgFZCgGvpH4niS0kZBGW9aYLle43NFgEwtzsGroOeAaL1eEGJ70ZB6b4QZAEv3V5cMZAOhhyjweIwHz3pk7VNXgIqlZCBXddaxLPb2xW4ln78U8gELU2PDZAxhqfvpvma107i9KCsocoPpZAD81PZC436ZBtx'},
-  {name:'Trisha Trisha',token:'EAAMnDBkWXtsBSI9vB3LFo3zB79NO2386TrUyZCpyjHbR0gzLqgkN6umsUU3XqEhMmPmCpbtM6YdnJiZAoDy42MbwkcuKzZBrmCb3ZB1G1wTS4IpRBZBnl1dCu2pbQU2TsK9OzFriWRZBWptbePXOh12ZCITZAepzWP5tK7qHXlZA2YKcAJFqAaswkrwRbxGc5oJdr'},
-  {name:'Sokhour Sok',token:'EAAMhIYONRB4BSMVkLuh455NzKdw2L9kNwNZBZAgKvenpTKaBbjnJBUqi7woO4eUu7D4SZCPMXC0N6Htw0We2iwEZCECkyNGr4JKTI5sDyq5unJgVMTV7N6kykg8WvIt3naaHE1ETQtibDCqxMpj791BgKohtxVEY0HeeZCFXeNXwlHfXwEAsQQ8LCuvhTrro3'},
-  {name:'Chan Dara',token:'EAAcC6ZBacE0kBSLecL4U7nVqn7BoTpNhavTeHIjQZC4rDBksY9ULMj58anSDKQ41SsgZAf2SjcruuTJrelv01hpXM5ZCg7NEJQnFNLqE5l2EjeHxHQWwpZB80w7vjNfEDDZC2ucBFQVL8IvZBYfDewRhGYSkX1jT6wvIZCrenEY0rKDsNlZBprpFmLaLmDwLEJ9ob'},
-  {name:'Oun Na Bii',token:'EAAPGG36LZAhMBSJq61gegCfs2kUVbFR8disVLwa9MgRLOGfKvElOV6PwWhrQT7EZBPIHwjWI7s8cX5sZCu4h6uTzKLHY1eHaN9OILrNs52ShIZB3QhVvn0Fe6PIcs4G6rlIaVMRXk2lZCELZADylZCg2Xd10BOjpOpIznV1ZBjNdF0BTwHQjxBH9i35RV5EOUl1bJ1N4f8ZB1Antkk7a7'},
-  {name:'Ry Na',token:'EAAYWJKrEaAUBSAa88W6ZBEteyCupo72AUinuWwfrkeBdlq5qAcZAA9SZCZCEBdhC7tPPVopDBKJg7wLlZC6gMjZAadKx7F0dk7pyRy7Tsbm0vPlDw7z9EE69szN6BZABOt2OUSo0HgmO4KoNHpl74h7JTHZBzIxDrNZBuyVWn39vaAkdRbgKMoNX4NWa34gywIPoa'},
-  {name:'Srey Hong',token:'EABBOSyU3fK0BSCzRZCZCZASmW0ARcXcZB1WZC0KuPRZAH7htEjwoOLC4uZBWxxDKzXhhLYOIhbHuDpnoZABbZC0E6ZCUGk9e01M3fBcZCu8HZBKTOgCbR8ZAJqpKR9NBKIZB7DKhFVXI6NzansZBN3CWhJqUsISuP6MnK1iBxE4QOThCI1K2N0Hl4VKKqI3u2vuYwHZAfdZBF'},
-  {name:'Za QB',token:'EAAih5Ur1rnoBSJ2q0PI7yk6eCD9qK7mzZCQwZBiE3gKZCPHsCFX4Hgapmau55hIsgimIzltBo1lgNRpDtveyyrtam0PX4dhoFGpYZCvcyk4B7Q5JTH2qOZCZCgEMzIH2km916eLTZC822OCIBwlfRpFqJliyIhq0gsjMupZBs1zJU2o4RPmoZCD2MxZBSzmzxUYvi1'},
-  {name:'So Daney',token:'EAAWnhBvpxW0BSKRoS36WkCv6q9sh5ZBE4obmiVuiLxSw8XZANeIPQA4dVzXoxMT58ffk3OSfGpoRMIS4RrCZA7Ul3NzbpLwHqZA2aeQxt6sAgC5pm5SHXRyPUEwNPZCnJ4Xl3JJiAOoBdp39npZBTefsZAIB6rENIrVAzm9BMZAwKdaC4NAXSM81oO6nj3jN6B86xV0DWm8Vb6EwYsD1'},
+  {name:'Van Rith'},
+  {name:'meymey mol'},
+  {name:'Bormey chan'},
+  {name:'Ty Srey Ni'},
+  {name:'dinnimo'},
+  {name:'Moev Moev'},
+  {name:'Ha Nguyen'},
+  {name:'nana'},
+  {name:'Jee Ka'},
+  {name:'Trisha Trisha'},
+  {name:'Sokhour Sok'},
+  {name:'Chan Dara'},
+  {name:'Oun Na Bii'},
+  {name:'Ry Na'},
+  {name:'Srey Hong'},
+  {name:'Za QB'},
+  {name:'So Daney'},
+];
+ async function collectFB(){
+  var p=getColPeriod();if(!p)return;
+  initWeekData(p.key,p.start,p.end);
+  var prog=document.getElementById('col-progress');
+  document.getElementById('col-log').innerHTML='';
+  prog.innerHTML='<div class="loading"><div class="spin"></div>Starting Facebook...</div><div class="pbar"><div class="pfill" id="fb-pf" style="width:0%"></div></div>';
+  var totalPages=0,failedAcc=0;
+  for(var i=0;i<FB_ACC.length;i++){
+    var acc=FB_ACC[i];
+    var pfEl=document.getElementById('fb-pf');
+    if(pfEl) pfEl.style.width=((i+1)/FB_ACC.length*100)+'%';
+    prog.querySelector('.loading').innerHTML='<div class="spin"></div>Facebook: '+acc.name+' ('+(i+1)+'/'+FB_ACC.length+')';
+    try{
+      var r=await fetch(FB_PROXY_URL+'/?acc='+i+'&start='+p.start+'&end='+p.end);
+      var d=await r.json();
+      if(d.error){addLog('FB '+acc.name+': '+d.error);failedAcc++;continue;}
+      var pages=d.records||[];
+      if(!pages.length){addLog('FB '+acc.name+': 0 pages returned');failedAcc++;continue;}
+      addLog('FB '+acc.name+': '+pages.length+' pages');
+      pages.forEach(function(pg){
+        var lastPostFmt = pg.lastPostDate ? new Date(pg.lastPostDate).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '';
+        var rec={platform:'facebook',account:acc.name,name:pg.name,pageId:pg.pageId,url:pg.url||'',subscribers:pg.subscribers||0,views:pg.views||0,reach:pg.reach||0,engagement:pg.engagement||0,likes:pg.likes||0,comments:pg.comments||0,shares:pg.shares||0,posts:pg.posts||0,lastPostDate:lastPostFmt,collected:ts()};
+        WD[p.key].records=WD[p.key].records.filter(function(x){return !(x.platform==='facebook'&&x.pageId===pg.pageId);});
+        WD[p.key].records.push(rec);
+        totalPages++;
+      });
+    }catch(ex){addLog('FB ERROR: '+acc.name+' — '+ex.message);failedAcc++;}
+    await new Promise(function(r){setTimeout(r,300);});
+  }
+  save();
+  prog.innerHTML='<div class="alert success">Facebook done: '+totalPages+' pages from '+(FB_ACC.length-failedAcc)+' accounts.</div>';
+  fillCmpSelects();updateExpSelect();
+}
 ];
 
 // STATE
