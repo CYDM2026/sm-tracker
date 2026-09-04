@@ -187,7 +187,7 @@ td.num{font-weight:600;font-variant-numeric:tabular-nums}
   <div id="col-alert"></div>
   <div class="card">
     <div class="card-title">Auto-collect all platforms</div>
-    <p style="font-size:13px;color:var(--text2);margin-bottom:16px">Fetches weekly stats from all 17 YouTube channels and all Facebook pages.</p>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:16px" id="col-scope-desc">Fetches weekly stats from all 17 YouTube channels and all Facebook pages.</p>
     <div class="btn-row">
       <button class="btn primary" onclick="collectAll()">🔄 Collect ALL now</button>
       <button class="btn" onclick="collectYT()">▶️ YouTube only</button>
@@ -392,7 +392,18 @@ function renderProjTabs(containerId, current, onClickFn){
   el.innerHTML = html;
 }
 function setDashProject(p){ dashProject = p; renderProjTabs('dash-proj-tabs', dashProject, 'setDashProject'); renderDash(); }
-function setColProject(p){ colProject = p; renderProjTabs('col-proj-tabs', colProject, 'setColProject'); renderColResults(); }
+function setColProject(p){ colProject = p; renderProjTabs('col-proj-tabs', colProject, 'setColProject'); renderColResults(); updateColScopeDesc(); }
+function updateColScopeDesc(){
+  var el=document.getElementById('col-scope-desc');
+  if(!el) return;
+  if(colProject==='all'){
+    el.textContent='Fetches weekly stats from all '+YT_CH.length+' YouTube channels and all '+FB_ACC.length+' Facebook pages.';
+  } else {
+    var ytCount=YT_CH.filter(function(ch){return matchesProject({platform:'youtube',name:ch.name},colProject);}).length;
+    var fbCount=FB_ACC.filter(function(acc){return matchesProject({platform:'facebook',account:acc.name},colProject);}).length;
+    el.textContent='Project '+colProject+': fetches '+ytCount+' YouTube channel(s) and '+fbCount+' Facebook account(s) only.';
+  }
+}
 
 function save(){ try{ localStorage.setItem('smtv5', JSON.stringify(WD)); }catch(e){} }
 function load(){ try{ WD = JSON.parse(localStorage.getItem('smtv5')||'{}'); }catch(e){ WD={}; } }
@@ -410,7 +421,7 @@ function showView(v){
   var map={dashboard:0,collect:1,metricool:2,history:3,compare:4,export:5};
   if(map[v]!==undefined) document.querySelectorAll('.nb')[map[v]].classList.add('active');
   if(v==='dashboard'){initDash();renderDash();}
-  if(v==='collect'){renderProjTabs('col-proj-tabs',colProject,'setColProject');renderColResults();}
+  if(v==='collect'){renderProjTabs('col-proj-tabs',colProject,'setColProject');renderColResults();updateColScopeDesc();}
   if(v==='history') renderHist();
   if(v==='compare'){fillCmpSelects();renderCompare();}
   if(v==='export') renderExp();
@@ -612,14 +623,16 @@ async function collectYT(){
   initWeekData(p.key,p.start,p.end);
   var prog=document.getElementById('col-progress');
   document.getElementById('col-log').innerHTML='';
+  var list=YT_CH.map(function(ch,idx){return {ch:ch,idx:idx};}).filter(function(o){return matchesProject({platform:'youtube',name:o.ch.name},colProject);});
+  if(!list.length){prog.innerHTML='<div class="alert info">No YouTube channels in this project.</div>';return;}
   prog.innerHTML='<div class="loading"><div class="spin"></div>Starting YouTube...</div><div class="pbar"><div class="pfill" id="yt-pf" style="width:0%"></div></div>';
   var sISO=p.start+'T00:00:00Z',eISO=p.end+'T23:59:59Z';
   var ok=0,fail=0;
-  for(var i=0;i<YT_CH.length;i++){
-    var ch=YT_CH[i];
+  for(var li=0;li<list.length;li++){
+    var ch=list[li].ch;
     var pfEl=document.getElementById('yt-pf');
-    if(pfEl) pfEl.style.width=((i+1)/YT_CH.length*100)+'%';
-    prog.querySelector('.loading').innerHTML='<div class="spin"></div>YouTube: '+ch.name+' ('+(i+1)+'/'+YT_CH.length+')';
+    if(pfEl) pfEl.style.width=((li+1)/list.length*100)+'%';
+    prog.querySelector('.loading').innerHTML='<div class="spin"></div>YouTube: '+ch.name+' ('+(li+1)+'/'+list.length+')';
     try{
       var r=await fetch('https://www.googleapis.com/youtube/v3/channels?part=statistics,snippet&id='+ch.id+'&key='+YT_KEY);
       var d=await r.json();
@@ -665,13 +678,15 @@ async function collectFB(){
   initWeekData(p.key,p.start,p.end);
   var prog=document.getElementById('col-progress');
   document.getElementById('col-log').innerHTML='';
+  var list=FB_ACC.map(function(acc,idx){return {acc:acc,idx:idx};}).filter(function(o){return matchesProject({platform:'facebook',account:o.acc.name},colProject);});
+  if(!list.length){prog.innerHTML='<div class="alert info">No Facebook accounts in this project.</div>';return;}
   prog.innerHTML='<div class="loading"><div class="spin"></div>Starting Facebook...</div><div class="pbar"><div class="pfill" id="fb-pf" style="width:0%"></div></div>';
   var totalPages=0,failedAcc=0;
-  for(var i=0;i<FB_ACC.length;i++){
-    var acc=FB_ACC[i];
+  for(var li=0;li<list.length;li++){
+    var acc=list[li].acc,i=list[li].idx;
     var pfEl=document.getElementById('fb-pf');
-    if(pfEl) pfEl.style.width=((i+1)/FB_ACC.length*100)+'%';
-    prog.querySelector('.loading').innerHTML='<div class="spin"></div>Facebook: '+acc.name+' ('+(i+1)+'/'+FB_ACC.length+')';
+    if(pfEl) pfEl.style.width=((li+1)/list.length*100)+'%';
+    prog.querySelector('.loading').innerHTML='<div class="spin"></div>Facebook: '+acc.name+' ('+(li+1)+'/'+list.length+')';
     try{
       var r=await fetch(FB_PROXY_URL+'/?acc='+i+'&start='+p.start+'&end='+p.end);
       var d=await r.json();
@@ -690,7 +705,7 @@ async function collectFB(){
     await new Promise(function(r){setTimeout(r,300);});
   }
   save();
-  prog.innerHTML='<div class="alert success">Facebook done: '+totalPages+' pages from '+(FB_ACC.length-failedAcc)+' accounts.</div>';
+  prog.innerHTML='<div class="alert success">Facebook done: '+totalPages+' pages from '+(list.length-failedAcc)+' accounts.</div>';
   fillCmpSelects();updateExpSelect();renderColResults();
 }
 
