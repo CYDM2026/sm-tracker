@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -150,10 +151,20 @@ td.num{font-weight:600;font-variant-numeric:tabular-nums}
       </div>
     </div>
   </div>
+  <div style="margin-bottom:16px">
+    <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px">Project</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap" id="dash-proj-tabs"></div>
+  </div>
   <div class="mg" id="dash-totals"></div>
-  <div id="dash-posts-section" style="display:none;margin-bottom:16px">
-    <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px">Total posts per channel</div>
-    <div class="posts-grid" id="dash-posts-grid"></div>
+  <div style="display:grid;grid-template-columns:1.3fr 1fr;gap:16px;margin-bottom:16px">
+    <div class="card">
+      <div class="card-title">Trend — subscribers/fans &amp; views by week</div>
+      <canvas id="dash-trend-chart" height="150"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-title">Top accounts (current week)</div>
+      <canvas id="dash-bar-chart" height="150"></canvas>
+    </div>
   </div>
   <div class="tw"><table>
     <thead><tr><th>Platform</th><th>Account</th><th>Page / Channel</th><th>Followers</th><th>Views</th><th>Reach</th><th>Engagement</th><th>Likes</th><th>Comments</th><th>Shares</th><th>Posts</th><th>Last Post</th><th>Collected</th></tr></thead>
@@ -169,6 +180,10 @@ td.num{font-weight:600;font-variant-numeric:tabular-nums}
     <label>Week End</label><input type="date" id="col-end">
     <span id="col-badge" class="wbadge" style="display:none"></span>
   </div>
+  <div style="margin-bottom:16px">
+    <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px">Project</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap" id="col-proj-tabs"></div>
+  </div>
   <div id="col-alert"></div>
   <div class="card">
     <div class="card-title">Auto-collect all platforms</div>
@@ -177,10 +192,15 @@ td.num{font-weight:600;font-variant-numeric:tabular-nums}
       <button class="btn primary" onclick="collectAll()">🔄 Collect ALL now</button>
       <button class="btn" onclick="collectYT()">▶️ YouTube only</button>
       <button class="btn" onclick="collectFB()">📘 Facebook only</button>
+      <button class="btn" style="margin-left:auto" onclick="downloadColExcel()">⬇️ Download this week as Excel</button>
     </div>
   </div>
   <div id="col-progress"></div>
-  <div id="col-log" style="font-size:12px;color:var(--text2);line-height:1.9;padding:0 4px;max-height:300px;overflow-y:auto"></div>
+  <div id="col-log" style="font-size:12px;color:var(--text2);line-height:1.9;padding:0 4px;max-height:220px;overflow-y:auto;margin-bottom:16px"></div>
+  <div class="tw"><table>
+    <thead><tr><th>Platform</th><th>Account</th><th>Page</th><th>Follower</th><th>Views</th><th>Reach</th><th>Likes</th><th>Comments</th><th>Shares</th><th>Posts</th></tr></thead>
+    <tbody id="col-results-tbody"><tr><td colspan="10" style="text-align:center;padding:20px;color:var(--text3)">Run a collect above to see results here.</td></tr></tbody>
+  </table></div>
 </div>
 
 <!-- METRICOOL MANUAL ENTRY -->
@@ -257,6 +277,7 @@ td.num{font-weight:600;font-variant-numeric:tabular-nums}
     <select id="cmp-plat" onchange="renderCompare()">
       <option value="all">All</option><option value="youtube">YouTube</option><option value="facebook">Facebook</option><option value="instagram">Instagram</option><option value="tiktok">TikTok</option>
     </select>
+    <button class="btn primary" style="margin-left:auto" onclick="downloadComparePPTX()">⬇️ Download as PowerPoint</button>
   </div>
   <div id="cmp-results"></div>
 </div>
@@ -284,6 +305,9 @@ td.num{font-weight:600;font-variant-numeric:tabular-nums}
 
 </main>
 </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/gitbrent/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
 <script>
 const YT_KEY = 'AIzaSyDAgveLEJLoMKy8B0wx9PYwcH_1DL1FFpk';
 const YT_CH = [
@@ -326,14 +350,49 @@ const FB_ACC = [
   {name:'So Daney'},
 ];
 
+const PROJECTS = {
+  'IR-KH': {fb:['Oun Na Bii','Van Rith','meymey mol'], yt:['Me and Him','Ba Ba','ស្ដាប់ចម្រៀង','Sok Mony']},
+  'B7': {fb:['Ry Na'], yt:['Oun Yaa','Naa Det AI','Time_Cooking','New_Song']},
+  'H5': {fb:['Ty Srey Ni','dinnimo','nana','Jee Ka','Srey Hong','Za QB'], yt:['Music For You','Sreyleab','Pen Nita','GoodtoEat','Music Song']},
+  'IR-VN': {fb:['Ha Nguyen','Bormey chan','Chan Dara'], yt:['Irich VN','An cung minh']},
+  'IR-PHP': {fb:['Trisha Trisha','Sokhour Sok','So Daney'], yt:['AI For Everyone']},
+  'IJ': {fb:['Moev Moev','Ly Lyka','Theary Pisey','Ah Jou'], yt:['Music Sad','Van Naroth']}
+};
+var PROJECT_KEYS = Object.keys(PROJECTS);
+function matchesProject(r, proj){
+  if(!proj || proj==='all') return true;
+  var p = PROJECTS[proj];
+  if(!p) return true;
+  if(r.platform==='youtube') return p.yt.indexOf(r.name)>=0;
+  if(r.platform==='facebook') return p.fb.indexOf(r.account)>=0;
+  return false;
+}
+
 // STATE
 var WD = {};
 var dashWeek = '';
 var dashPF = 'all';
+var dashProject = 'all';
+var colProject = 'all';
 var histWeek = null;
 var dashCalDate = new Date();
 var mcPlatform = 'facebook';
 var mcRowN = 0;
+var dashTrendChart = null;
+var dashBarChart = null;
+var cmpChart = null;
+
+function renderProjTabs(containerId, current, onClickFn){
+  var el = document.getElementById(containerId);
+  if(!el) return;
+  var html = '<button class="pftab'+(current==='all'?' active':'')+'" onclick="'+onClickFn+'(\'all\')">All Projects</button>';
+  PROJECT_KEYS.forEach(function(k){
+    html += '<button class="pftab'+(current===k?' active':'')+'" onclick="'+onClickFn+'(\''+k+'\')">'+k+'</button>';
+  });
+  el.innerHTML = html;
+}
+function setDashProject(p){ dashProject = p; renderProjTabs('dash-proj-tabs', dashProject, 'setDashProject'); renderDash(); }
+function setColProject(p){ colProject = p; renderProjTabs('col-proj-tabs', colProject, 'setColProject'); renderColResults(); }
 
 function save(){ try{ localStorage.setItem('smtv5', JSON.stringify(WD)); }catch(e){} }
 function load(){ try{ WD = JSON.parse(localStorage.getItem('smtv5')||'{}'); }catch(e){ WD={}; } }
@@ -351,8 +410,9 @@ function showView(v){
   var map={dashboard:0,collect:1,metricool:2,history:3,compare:4,export:5};
   if(map[v]!==undefined) document.querySelectorAll('.nb')[map[v]].classList.add('active');
   if(v==='dashboard'){initDash();renderDash();}
+  if(v==='collect'){renderProjTabs('col-proj-tabs',colProject,'setColProject');renderColResults();}
   if(v==='history') renderHist();
-  if(v==='compare') fillCmpSelects();
+  if(v==='compare'){fillCmpSelects();renderCompare();}
   if(v==='export') renderExp();
   if(v==='metricool') initMcDates();
 }
@@ -464,33 +524,64 @@ function setPF(f){
 
 // RENDER DASHBOARD
 function renderDash(){
+  renderProjTabs('dash-proj-tabs', dashProject, 'setDashProject');
   var wk=dashWeek;
   if(!wk||!WD[wk]){
     document.getElementById('dash-totals').innerHTML='';
     document.getElementById('dash-tbody').innerHTML='<tr><td colspan="13" style="text-align:center;padding:32px;color:var(--text3)">No data yet. Use Collect Weekly or Metricool Entry.</td></tr>';
-    document.getElementById('dash-posts-section').style.display='none';
+    renderDashTrendChart();renderDashBarChart([]);
     return;
   }
-  var recs=WD[wk].records.filter(function(r){return dashPF==='all'||r.platform===dashPF;}).slice().sort(function(a,b){return (b.subscribers||0)-(a.subscribers||0);});
+  var recs=WD[wk].records.filter(function(r){return (dashPF==='all'||r.platform===dashPF)&&matchesProject(r,dashProject);}).slice().sort(function(a,b){return (b.subscribers||0)-(a.subscribers||0);});
   var tot={subs:0,views:0,reach:0,eng:0,posts:0,pages:recs.length};
   recs.forEach(function(r){tot.subs+=r.subscribers||0;tot.views+=r.views||0;tot.reach+=r.reach||0;tot.eng+=r.engagement||0;tot.posts+=r.posts||0;});
   document.getElementById('dash-totals').innerHTML=[
     ['Pages/Channels',tot.pages],['Subscribers/Fans',tot.subs],
     ['Views (week)',tot.views],['Reach',tot.reach],['Engagement',tot.eng],['Total Posts',tot.posts]
   ].map(function(x){return '<div class="mt"><div class="ml">'+x[0]+'</div><div class="mv">'+fmt(x[1])+'</div></div>';}).join('');
-  var postCards=recs.filter(function(r){return r.posts>0;});
-  var pSec=document.getElementById('dash-posts-section');
-  if(postCards.length){
-    pSec.style.display='block';
-    document.getElementById('dash-posts-grid').innerHTML=postCards.map(function(r){
-      var bc=r.platform==='youtube'?'#cc0000':r.platform==='instagram'?'#c13584':r.platform==='tiktok'?'#333':'#1877f2';
-      return '<div class="post-tile" style="border-left:3px solid '+bc+'"><div style="font-size:10px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px" title="'+r.name+'">'+r.name+'</div><div style="font-size:20px;font-weight:700">'+fmt(r.posts)+'</div><div style="font-size:10px;color:var(--text3);margin-top:2px">'+(r.platform==='youtube'?'videos':'posts')+'</div><div style="font-size:10px;color:var(--text2);font-weight:500;margin-top:3px">'+(r.lastPostDate||'')+'</div></div>';
-    }).join('');
-  } else pSec.style.display='none';
   document.getElementById('dash-tbody').innerHTML=recs.length?recs.map(function(r){
     var bc=r.platform==='youtube'?'byt':r.platform==='instagram'?'big':r.platform==='tiktok'?'btt':'bfb';
     return '<tr><td><span class="badge '+bc+'">'+r.platform+'</span></td><td style="font-size:11px;color:var(--text2)">'+r.account+'</td><td><strong>'+r.name+'</strong></td><td class="num">'+fmt(r.subscribers)+'</td><td class="num">'+fmt(r.views)+'</td><td class="num">'+fmt(r.reach)+'</td><td class="num">'+fmt(r.engagement)+'</td><td class="num">'+fmt(r.likes)+'</td><td class="num">'+fmt(r.comments)+'</td><td class="num">'+fmt(r.shares)+'</td><td class="num">'+fmt(r.posts)+'</td><td style="font-size:12px;color:var(--text2)">'+(r.lastPostDate||'')+'</td><td style="font-size:11px;color:var(--text3)">'+(r.collected||'')+'</td></tr>';
   }).join(''):'<tr><td colspan="13" style="text-align:center;padding:20px;color:var(--text3)">No data for this filter.</td></tr>';
+  renderDashTrendChart();
+  renderDashBarChart(recs);
+}
+
+function renderDashTrendChart(){
+  var canvas=document.getElementById('dash-trend-chart');
+  if(!canvas||typeof Chart==='undefined') return;
+  var weeks=getWeeks().slice().sort();
+  var labels=[],subsArr=[],viewsArr=[];
+  weeks.forEach(function(w){
+    var pts=w.split('_');
+    var recs=(WD[w].records||[]).filter(function(r){return (dashPF==='all'||r.platform===dashPF)&&matchesProject(r,dashProject);});
+    if(!recs.length && weeks.length>1) return;
+    var s=0,v=0;
+    recs.forEach(function(r){s+=r.subscribers||0;v+=r.views||0;});
+    labels.push(wkLabel(pts[0],pts[1]));
+    subsArr.push(s);viewsArr.push(v);
+  });
+  if(dashTrendChart) dashTrendChart.destroy();
+  dashTrendChart=new Chart(canvas.getContext('2d'),{
+    type:'line',
+    data:{labels:labels,datasets:[
+      {label:'Subscribers/Fans',data:subsArr,borderColor:'#3b5bdb',backgroundColor:'rgba(59,91,219,0.1)',tension:0.3,fill:true,yAxisID:'y'},
+      {label:'Views',data:viewsArr,borderColor:'#cc0000',backgroundColor:'rgba(204,0,0,0.08)',tension:0.3,fill:true,yAxisID:'y1'}
+    ]},
+    options:{responsive:true,interaction:{mode:'index',intersect:false},scales:{y:{position:'left',title:{display:true,text:'Subscribers/Fans'}},y1:{position:'right',grid:{drawOnChartArea:false},title:{display:true,text:'Views'}}}}
+  });
+}
+
+function renderDashBarChart(recs){
+  var canvas=document.getElementById('dash-bar-chart');
+  if(!canvas||typeof Chart==='undefined') return;
+  var top=recs.slice().sort(function(a,b){return (b.subscribers||0)-(a.subscribers||0);}).slice(0,8);
+  if(dashBarChart) dashBarChart.destroy();
+  dashBarChart=new Chart(canvas.getContext('2d'),{
+    type:'bar',
+    data:{labels:top.map(function(r){return r.name;}),datasets:[{label:'Followers/Subscribers',data:top.map(function(r){return r.subscribers||0;}),backgroundColor:top.map(function(r){return r.platform==='youtube'?'#cc0000':r.platform==='facebook'?'#1877f2':r.platform==='instagram'?'#c13584':'#333';})}]},
+    options:{responsive:true,indexAxis:'y',plugins:{legend:{display:false}}}
+  });
 }
 
 // COLLECT
@@ -559,13 +650,14 @@ async function collectYT(){
         WD[p.key].records.push(rec);
         addLog('YT: '+ch.name+' — '+fmt(totalSubs)+' subs / '+weekPosts+' posts this week');
         ok++;
-      }else{addLog('YT: '+ch.name+' — no data');fail++;}
+      }else if(d.error){addLog('YT ERROR: '+ch.name+' — '+(d.error.message||JSON.stringify(d.error)));fail++;}
+      else{addLog('YT: '+ch.name+' — no data');fail++;}
     }catch(ex){addLog('YT ERROR: '+ch.name+' — '+ex.message);fail++;}
     await new Promise(function(r){setTimeout(r,300);});
   }
   save();
   prog.innerHTML='<div class="alert success">YouTube done: '+ok+' channels. Week: '+p.start+' to '+p.end+'</div>';
-  fillCmpSelects();updateExpSelect();
+  fillCmpSelects();updateExpSelect();renderColResults();
 }
 
 async function collectFB(){
@@ -599,10 +691,43 @@ async function collectFB(){
   }
   save();
   prog.innerHTML='<div class="alert success">Facebook done: '+totalPages+' pages from '+(FB_ACC.length-failedAcc)+' accounts.</div>';
-  fillCmpSelects();updateExpSelect();
+  fillCmpSelects();updateExpSelect();renderColResults();
 }
 
-async function collectAll(){document.getElementById('col-log').innerHTML='';await collectYT();await collectFB();}
+async function collectAll(){document.getElementById('col-log').innerHTML='';await collectYT();await collectFB();renderColResults();}
+
+function getColWeekRecords(){
+  var s=document.getElementById('col-start').value,e=document.getElementById('col-end').value;
+  if(!s||!e) return [];
+  var key=s+'_'+e;
+  if(!WD[key]) return [];
+  return WD[key].records.filter(function(r){return matchesProject(r,colProject);});
+}
+
+function renderColResults(){
+  var recs=getColWeekRecords().slice().sort(function(a,b){return (b.subscribers||0)-(a.subscribers||0);});
+  var tbody=document.getElementById('col-results-tbody');
+  if(!tbody) return;
+  tbody.innerHTML=recs.length?recs.map(function(r){
+    var bc=r.platform==='youtube'?'byt':r.platform==='instagram'?'big':r.platform==='tiktok'?'btt':'bfb';
+    return '<tr><td><span class="badge '+bc+'">'+r.platform+'</span></td><td style="font-size:11px;color:var(--text2)">'+r.account+'</td><td><strong>'+r.name+'</strong></td><td class="num">'+fmt(r.subscribers)+'</td><td class="num">'+fmt(r.views)+'</td><td class="num">'+fmt(r.reach)+'</td><td class="num">'+fmt(r.likes)+'</td><td class="num">'+fmt(r.comments)+'</td><td class="num">'+fmt(r.shares)+'</td><td class="num">'+fmt(r.posts)+'</td></tr>';
+  }).join(''):'<tr><td colspan="10" style="text-align:center;padding:20px;color:var(--text3)">No data for this week/project yet — run a collect above.</td></tr>';
+}
+
+function downloadColExcel(){
+  var recs=getColWeekRecords();
+  if(!recs.length){alert('No data for this week/project yet. Run a collect first.');return;}
+  if(typeof XLSX==='undefined'){alert('Excel library did not load — check your internet connection.');return;}
+  var s=document.getElementById('col-start').value,e=document.getElementById('col-end').value;
+  var rows=recs.map(function(r){
+    return {Platform:r.platform,Account:r.account,Page:r.name,Follower:r.subscribers||0,Views:r.views||0,Reach:r.reach||0,Likes:r.likes||0,Comments:r.comments||0,Shares:r.shares||0,Posts:r.posts||0,'Last Post':r.lastPostDate||'','Collected At':r.collected||''};
+  });
+  var ws=XLSX.utils.json_to_sheet(rows);
+  ws['!cols']=[{wch:11},{wch:16},{wch:20},{wch:10},{wch:10},{wch:10},{wch:9},{wch:10},{wch:9},{wch:8},{wch:14},{wch:20}];
+  var wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Weekly Data');
+  XLSX.writeFile(wb,'sm_tracker_'+s+'_to_'+e+(colProject!=='all'?'_'+colProject:'')+'.xlsx');
+}
 
 // METRICOOL MANUAL ENTRY
 function setMcPlatform(plat){
@@ -691,7 +816,7 @@ function renderHist(){
   var weeks=getWeeks();
   var list=document.getElementById('hist-list');
   if(!weeks.length){list.innerHTML='<div style="padding:16px;font-size:13px;color:var(--text3)">No saved weeks.</div>';return;}
-  var html='';
+  list.innerHTML='';
   weeks.forEach(function(w){
     var pts=w.split('_');
     var recs=WD[w]&&WD[w].records?WD[w].records.length:0;
@@ -706,9 +831,8 @@ function renderHist(){
     div.onclick=function(){viewHist(this.dataset.w);};
     div.innerHTML='<div><div style="font-weight:'+fw+';color:'+col+'">'+lbl+'</div><div style="font-size:11px;color:var(--text3)">'+recs+' records</div></div><button style="border:none;background:none;cursor:pointer;color:var(--danger);font-size:12px">Del</button>';
     div.querySelector('button').onclick=function(e){e.stopPropagation();delWeek(div.dataset.w);};
-    html+=div.outerHTML;
+    list.appendChild(div);
   });
-  list.innerHTML=html;
 }
 
 function viewHist(wk){
@@ -733,10 +857,13 @@ function fillCmpSelects(){
   if(weeks.length>=2){var a=document.getElementById('cmp-a'),b=document.getElementById('cmp-b');if(a&&!a.value)a.value=weeks[1];if(b&&!b.value)b.value=weeks[0];}
 }
 
+var lastCmp = null;
+
 function renderCompare(){
   var wa=document.getElementById('cmp-a').value,wb=document.getElementById('cmp-b').value;
   var plat=document.getElementById('cmp-plat').value;
   var el=document.getElementById('cmp-results');
+  lastCmp=null;
   if(!wa||!wb){el.innerHTML='';return;}
   if(wa===wb){el.innerHTML='<div class="alert info">Select two different weeks.</div>';return;}
   var filt=function(r){return plat==='all'||r.platform===plat;};
@@ -749,34 +876,134 @@ function renderCompare(){
   ra.forEach(function(r){METS.forEach(function(m){tA[m]+=(r[m]||0);});});
   rb.forEach(function(r){METS.forEach(function(m){tB[m]+=(r[m]||0);});});
   var pts_a=wa.split('_'),pts_b=wb.split('_');
-  var html='<div style="font-size:12px;color:var(--text2);margin-bottom:12px;padding:8px 12px;background:var(--bg);border-radius:var(--radius)">Week A: <strong>'+wkLabel(pts_a[0],pts_a[1])+'</strong> vs Week B: <strong>'+wkLabel(pts_b[0],pts_b[1])+'</strong></div>';
+  var lblA=wkLabel(pts_a[0],pts_a[1]),lblB=wkLabel(pts_b[0],pts_b[1]);
+  var html='<div style="font-size:12px;color:var(--text2);margin-bottom:12px;padding:8px 12px;background:var(--bg);border-radius:var(--radius)">Week A: <strong>'+lblA+'</strong> vs Week B: <strong>'+lblB+'</strong></div>';
   html+='<div class="cmp-grid">';
   METS.forEach(function(m){
     var diff=tB[m]-tA[m];
     var pct=tA[m]?((diff/tA[m])*100).toFixed(1):'0';
     var cls=diff>0?'up':diff<0?'down':'flat';
-    var arrow=diff>0?'UP':diff<0?'DOWN':'';
     var border=diff>0?'border:2px solid #1877f2;background:#e7f0fd':diff<0?'border:2px solid #c92a2a;background:#fff5f5':'border:1px solid var(--border)';
     var valCol=diff>0?'color:#1877f2':diff<0?'color:#c92a2a':'';
     html+='<div class="cmp-tile" style="'+border+'"><div class="cl">'+LBLS[m]+'</div><div class="cv" style="'+valCol+'">'+fmt(tB[m])+'</div><div class="cp">Week A: '+fmt(tA[m])+'</div><div class="cd '+cls+'">'+(diff===0?'No change':(diff>0?'Up ':'Down ')+fmt(Math.abs(diff))+' ('+pct+'%)')+'</div></div>';
   });
   html+='</div>';
+  html+='<div class="card"><div class="card-title">Week A vs Week B — totals</div><canvas id="cmp-chart" height="90"></canvas></div>';
   var allNames=[];
   ra.concat(rb).forEach(function(r){if(allNames.indexOf(r.name)<0)allNames.push(r.name);});
-  html+='<div class="tw"><table><thead><tr><th>Platform</th><th>Page</th><th>Subs A</th><th>Subs B</th><th>Growth</th><th>Views A</th><th>Views B</th><th>Reach A</th><th>Reach B</th><th>Posts A</th><th>Posts B</th></tr></thead><tbody>';
-  allNames.sort().forEach(function(name){
+  var rows=allNames.map(function(name){
     var rA=ra.find(function(r){return r.name===name;});
     var rB=rb.find(function(r){return r.name===name;});
     var sA=rA?rA.subscribers||0:0,sB=rB?rB.subscribers||0:0;
     var diff=sB-sA;
-    var cls=diff>0?'up':diff<0?'down':'flat';
+    var pct=sA?((diff/sA)*100):(sB>0?100:0);
     var plat2=(rA||rB).platform||'';
-    var bc=plat2==='youtube'?'byt':plat2==='instagram'?'big':plat2==='tiktok'?'btt':'bfb';
-    var rowBg=diff>0?'background:#f0f4ff':diff<0?'background:#fff5f5':'';
-    html+='<tr style="'+rowBg+'"><td><span class="badge '+bc+'">'+plat2+'</span></td><td><strong>'+name+'</strong></td><td class="num">'+fmt(sA)+'</td><td class="num">'+fmt(sB)+'</td><td class="num '+cls+'" style="font-weight:700">'+(diff===0?'':(diff>0?'Up ':'Down ')+fmt(Math.abs(diff)))+'</td><td class="num">'+fmt(rA?rA.views||0:0)+'</td><td class="num">'+fmt(rB?rB.views||0:0)+'</td><td class="num">'+fmt(rA?rA.reach||0:0)+'</td><td class="num">'+fmt(rB?rB.reach||0:0)+'</td><td class="num">'+fmt(rA?rA.posts||0:0)+'</td><td class="num">'+fmt(rB?rB.posts||0:0)+'</td></tr>';
+    var account=(rA||rB).account||'';
+    return {name:name,platform:plat2,account:account,sA:sA,sB:sB,diff:diff,pct:pct,rA:rA,rB:rB};
+  });
+  rows.sort(function(a,b){return b.diff-a.diff;});
+  var gainers=rows.filter(function(r){return r.diff>0;}).slice(0,3);
+  var droppers=rows.filter(function(r){return r.diff<0;}).sort(function(a,b){return a.diff-b.diff;}).slice(0,3);
+  html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">';
+  html+='<div class="card"><div class="card-title" style="color:#1877f2">🔼 Top gainers</div>'+(gainers.length?gainers.map(function(r){return '<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px"><span>'+r.name+'</span><strong style="color:#1877f2">+'+fmt(r.diff)+' ('+r.pct.toFixed(1)+'%)</strong></div>';}).join(''):'<div style="font-size:12px;color:var(--text3)">No gains in this range.</div>')+'</div>';
+  html+='<div class="card"><div class="card-title" style="color:#c92a2a">🔽 Top drops</div>'+(droppers.length?droppers.map(function(r){return '<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px"><span>'+r.name+'</span><strong style="color:#c92a2a">'+fmt(r.diff)+' ('+r.pct.toFixed(1)+'%)</strong></div>';}).join(''):'<div style="font-size:12px;color:var(--text3)">No drops in this range.</div>')+'</div>';
+  html+='</div>';
+  html+='<div class="tw"><table><thead><tr><th>Platform</th><th>Page</th><th>Subs A</th><th>Subs B</th><th>Growth</th><th>% Change</th><th>Views A</th><th>Views B</th><th>Reach A</th><th>Reach B</th><th>Posts A</th><th>Posts B</th></tr></thead><tbody>';
+  rows.slice().sort(function(a,b){return a.name.localeCompare(b.name);}).forEach(function(r){
+    var cls=r.diff>0?'up':r.diff<0?'down':'flat';
+    var bc=r.platform==='youtube'?'byt':r.platform==='instagram'?'big':r.platform==='tiktok'?'btt':'bfb';
+    var rowBg=r.diff>0?'background:#f0f4ff':r.diff<0?'background:#fff5f5':'';
+    html+='<tr style="'+rowBg+'"><td><span class="badge '+bc+'">'+r.platform+'</span></td><td><strong>'+r.name+'</strong></td><td class="num">'+fmt(r.sA)+'</td><td class="num">'+fmt(r.sB)+'</td><td class="num '+cls+'" style="font-weight:700">'+(r.diff===0?'':(r.diff>0?'Up ':'Down ')+fmt(Math.abs(r.diff)))+'</td><td class="num '+cls+'" style="font-weight:700">'+r.pct.toFixed(1)+'%</td><td class="num">'+fmt(r.rA?r.rA.views||0:0)+'</td><td class="num">'+fmt(r.rB?r.rB.views||0:0)+'</td><td class="num">'+fmt(r.rA?r.rA.reach||0:0)+'</td><td class="num">'+fmt(r.rB?r.rB.reach||0:0)+'</td><td class="num">'+fmt(r.rA?r.rA.posts||0:0)+'</td><td class="num">'+fmt(r.rB?r.rB.posts||0:0)+'</td></tr>';
   });
   html+='</tbody></table></div>';
   el.innerHTML=html;
+  lastCmp={lblA:lblA,lblB:lblB,METS:METS,LBLS:LBLS,tA:tA,tB:tB,rows:rows,gainers:gainers,droppers:droppers,plat:plat};
+  renderCmpChart();
+}
+
+function renderCmpChart(){
+  var canvas=document.getElementById('cmp-chart');
+  if(!canvas||typeof Chart==='undefined'||!lastCmp) return;
+  if(cmpChart) cmpChart.destroy();
+  var m=lastCmp;
+  cmpChart=new Chart(canvas.getContext('2d'),{
+    type:'bar',
+    data:{labels:m.METS.map(function(k){return m.LBLS[k];}),datasets:[
+      {label:m.lblA,data:m.METS.map(function(k){return m.tA[k];}),backgroundColor:'#9aa0ad'},
+      {label:m.lblB,data:m.METS.map(function(k){return m.tB[k];}),backgroundColor:'#3b5bdb'}
+    ]},
+    options:{responsive:true,plugins:{legend:{position:'top'}}}
+  });
+}
+
+async function downloadComparePPTX(){
+  if(!lastCmp){alert('Select two weeks to compare first.');return;}
+  if(typeof PptxGenJS==='undefined'){alert('PowerPoint library did not load — check your internet connection.');return;}
+  var m=lastCmp;
+  var pptx=new PptxGenJS();
+  pptx.defineLayout({name:'WIDE',width:13.33,height:7.5});
+  pptx.layout='WIDE';
+  var NAVY='1a1d23',ACCENT='3b5bdb',GREY='5a6070',LIGHT='f5f6f8',GREEN='1877f2',RED='c92a2a';
+
+  var s1=pptx.addSlide();
+  s1.background={color:NAVY};
+  s1.addText('SM Weekly Tracker',{x:0.6,y:2.6,w:12,h:0.6,fontSize:14,color:'9aa0ad',fontFace:'Arial'});
+  s1.addText('Weekly Performance Comparison',{x:0.6,y:3.1,w:12,h:1,fontSize:36,bold:true,color:'FFFFFF',fontFace:'Arial'});
+  s1.addText(m.lblA+'  →  '+m.lblB,{x:0.6,y:4.0,w:12,h:0.5,fontSize:18,color:'bac8ff',fontFace:'Arial'});
+  s1.addText('mediapro.kh',{x:0.6,y:6.9,w:6,h:0.4,fontSize:11,color:'9aa0ad',fontFace:'Arial'});
+
+  var s2=pptx.addSlide();
+  s2.background={color:'FFFFFF'};
+  s2.addText('Summary — Week A vs Week B',{x:0.5,y:0.35,w:12,h:0.6,fontSize:24,bold:true,color:NAVY,fontFace:'Arial'});
+  var cols=4,cw=2.95,ch=1.55,gap=0.15,x0=0.5,y0=1.3;
+  m.METS.forEach(function(k,i){
+    var diff=m.tB[k]-m.tA[k];
+    var pct=m.tA[k]?((diff/m.tA[k])*100).toFixed(1):'0';
+    var col=i%cols,row=Math.floor(i/cols);
+    var x=x0+col*(cw+gap),y=y0+row*(ch+gap);
+    var color=diff>0?GREEN:diff<0?RED:GREY;
+    s2.addShape('roundRect',{x:x,y:y,w:cw,h:ch,rectRadius:0.08,fill:{color:LIGHT},line:{color:'e2e5ea',width:1}});
+    s2.addText(m.LBLS[k],{x:x+0.15,y:y+0.1,w:cw-0.3,h:0.3,fontSize:11,color:GREY,bold:true,fontFace:'Arial'});
+    s2.addText(String(m.tB[k].toLocaleString()),{x:x+0.15,y:y+0.4,w:cw-0.3,h:0.5,fontSize:22,bold:true,color:NAVY,fontFace:'Arial'});
+    s2.addText((diff>=0?'+':'')+diff.toLocaleString()+' ('+pct+'%)',{x:x+0.15,y:y+0.95,w:cw-0.3,h:0.4,fontSize:12,color:color,bold:true,fontFace:'Arial'});
+  });
+
+  var s3=pptx.addSlide();
+  s3.background={color:'FFFFFF'};
+  s3.addText('Totals Comparison',{x:0.5,y:0.35,w:12,h:0.6,fontSize:24,bold:true,color:NAVY,fontFace:'Arial'});
+  s3.addChart(pptx.ChartType.bar,[
+    {name:m.lblA,labels:m.METS.map(function(k){return m.LBLS[k];}),values:m.METS.map(function(k){return m.tA[k];})},
+    {name:m.lblB,labels:m.METS.map(function(k){return m.LBLS[k];}),values:m.METS.map(function(k){return m.tB[k];})}
+  ],{x:0.5,y:1.2,w:12.3,h:5.8,barDir:'col',chartColors:['9aa0ad','3b5bdb'],showLegend:true,legendPos:'t',showTitle:false,catAxisLabelColor:GREY,valAxisLabelColor:GREY});
+
+  var s4=pptx.addSlide();
+  s4.background={color:'FFFFFF'};
+  s4.addText('Top Gainers & Drops',{x:0.5,y:0.35,w:12,h:0.6,fontSize:24,bold:true,color:NAVY,fontFace:'Arial'});
+  s4.addText('🔼 Top Gainers',{x:0.5,y:1.2,w:6,h:0.4,fontSize:16,bold:true,color:GREEN,fontFace:'Arial'});
+  (m.gainers.length?m.gainers:[{name:'—',diff:0,pct:0}]).forEach(function(r,i){
+    s4.addText(r.name,{x:0.5,y:1.7+i*0.6,w:4,h:0.5,fontSize:14,color:NAVY,fontFace:'Arial'});
+    s4.addText('+'+fmt(r.diff)+' ('+r.pct.toFixed(1)+'%)',{x:4.5,y:1.7+i*0.6,w:2,h:0.5,fontSize:14,bold:true,color:GREEN,fontFace:'Arial'});
+  });
+  s4.addText('🔽 Top Drops',{x:7,y:1.2,w:6,h:0.4,fontSize:16,bold:true,color:RED,fontFace:'Arial'});
+  (m.droppers.length?m.droppers:[{name:'—',diff:0,pct:0}]).forEach(function(r,i){
+    s4.addText(r.name,{x:7,y:1.7+i*0.6,w:4,h:0.5,fontSize:14,color:NAVY,fontFace:'Arial'});
+    s4.addText(fmt(r.diff)+' ('+r.pct.toFixed(1)+'%)',{x:11,y:1.7+i*0.6,w:2,h:0.5,fontSize:14,bold:true,color:RED,fontFace:'Arial'});
+  });
+
+  var s5=pptx.addSlide();
+  s5.background={color:'FFFFFF'};
+  s5.addText('Per-Account Detail',{x:0.5,y:0.35,w:12,h:0.5,fontSize:22,bold:true,color:NAVY,fontFace:'Arial'});
+  var head=[['Page','Platform','Subs A','Subs B','Growth','% Change']];
+  var body=m.rows.slice(0,14).map(function(r){return [r.name,r.platform,String(r.sA),String(r.sB),(r.diff>=0?'+':'')+r.diff,r.pct.toFixed(1)+'%'];});
+  var tblRows=head.concat(body).map(function(row,ri){
+    return row.map(function(cell){return {text:cell,options:{fontSize:10,color:ri===0?'FFFFFF':NAVY,bold:ri===0,fill:{color:ri===0?ACCENT:(ri%2===0?LIGHT:'FFFFFF')}}};});
+  });
+  s5.addTable(tblRows,{x:0.5,y:1.0,w:12.3,colW:[3.5,2,1.7,1.7,1.7,1.7],autoPage:false});
+  if(m.rows.length>14){
+    s5.addText('+ '+(m.rows.length-14)+' more accounts — see full data in the app or CSV export.',{x:0.5,y:6.9,w:12,h:0.3,fontSize:10,italic:true,color:GREY,fontFace:'Arial'});
+  }
+
+  pptx.writeFile({fileName:'sm_tracker_compare_'+m.lblA.replace(/\s/g,'')+'_vs_'+m.lblB.replace(/\s/g,'')+'.pptx'});
 }
 
 // EXPORT
